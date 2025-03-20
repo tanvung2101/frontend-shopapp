@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@theme {
+  --color-orange: #ee4d2d; 
+}
+
+@layer components {
+  .layout{
+          max-width: theme('columns.7xl');
+          margin-left: auto;
+          margin-right: auto;
+          padding-left: 1rem;
+          padding-right: 1rem;
+        }
+}
