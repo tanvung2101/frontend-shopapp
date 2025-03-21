@@ -15,6 +15,10 @@ import MainLayout from './components/MainLayout';
 import HomePage from './pages/home/HomePage';
 import { useSelector } from 'react-redux';
 import { RootState } from './store';
+import path from './constants/path';
+import ProductDetail from './pages/ProductDetail';
+import UserLayout from './components/UserLayout/UserLayout';
+import Profile from './pages/Profile/Profile';
 
 function NotRequireAuth() {
   const { token } = useSelector((state: RootState) => state.account);
@@ -25,6 +29,12 @@ function NotRequireAuth() {
   }
 
   return <Outlet/>;
+}
+
+function ProtectedRoute() {
+  const { token, info } = useSelector((state: RootState) => state.account);
+  console.log(info)
+  return token ? <Outlet /> : <Navigate to={path.login} />;
 }
 
 function App() {
@@ -39,7 +49,43 @@ function App() {
     },
     {
       path: "",
-      element: (<NotRequireAuth/>),
+      element: <ProtectedRoute />,
+      children: [
+        // {
+        //   path: path.cart,
+        //   element: (
+        //     <CartLayout>
+        //       <Cart />
+        //     </CartLayout>
+        //   ),
+        // },
+        {
+          path: path.user,
+          element: (
+            <MainLayout>
+              <UserLayout />
+            </MainLayout>
+          ),
+          children: [
+            {
+              path: path.profile,
+              element: <Profile />,
+            },
+            // {
+            //   path: path.changePassword,
+            //   element: <ChangePassword />,
+            // },
+            // {
+            //   path: path.historyPurchase,
+            //   element: <HistoryPurchase />,
+            // },
+          ],
+        },
+      ],
+    },
+    {
+      path: "",
+      element: <NotRequireAuth />,
       children: [
         {
           path: "/login",
@@ -73,6 +119,15 @@ function App() {
         <AuthHeader>
           <RestPassword />
         </AuthHeader>
+      ),
+    },
+    {
+      path: path.productDetail,
+      index: true,
+      element: (
+        <MainLayout>
+          <ProductDetail />
+        </MainLayout>
       ),
     },
   ]);

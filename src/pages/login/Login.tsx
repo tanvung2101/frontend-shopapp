@@ -10,7 +10,7 @@ import axiosInstance from "../../apis/axios";
 import { LoginResponse } from "../../interface/auth.interface";
 import { useDispatch } from "react-redux";
 import { AppDispatch} from "../../store";
-import { setToken } from "../../store/slices/accountSlice";
+import { setInfoLogin } from "../../store/slices/accountSlice";
 import { storage } from "../../utils/storage";
 // import { storage } from "../../utils/storage";
 
@@ -60,7 +60,7 @@ export default function Login() {
           axiosInstance.defaults.headers.common = {
             Authorization: `Bearer ${data.access_token}`,
           };
-          dispatch(setToken({ token: data.access_token }))
+          dispatch(setInfoLogin({ token: data.access_token , info: data.data}));
           storage.setToken(data.access_token)
           navigate("/");
           // storage.setToken(STORAGE_KEY.TOKEN, token);

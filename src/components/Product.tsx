@@ -1,18 +1,27 @@
 import { Link } from "react-router-dom";
 import { Product as TypeProduct } from "../interface/product.interface";
+import path from "../constants/path";
+import { generateNameId } from "../utils/utils";
 
 export default function Product({ product }: { product: TypeProduct }) {
   return (
-    <Link to="/">
+    <Link
+      to={`${path.home}${generateNameId({
+        name: product.name,
+        id: String(product.id),
+      })}`}
+    >
       <div className="bg-white shadow rounded-sm hover:translate-y-[-0.4rem] hover:shadow-md duration-100 transition-transform overflow-hidden">
         <div className="w-full pt-[100%] relative">
-          {product.image && <img
-            src={product.image || ""}
-            alt={product.name}
-            width="100"
-            height="100"
-            className="absolute top-0 left-0 bg-white w-full h-full object-cover"
-          />}
+          {product.image && (
+            <img
+              src={product.image || ""}
+              alt={product.name}
+              width="100"
+              height="100"
+              className="absolute top-0 left-0 bg-white w-full h-full object-cover"
+            />
+          )}
         </div>
         <div className="p-2 overflow-hidden">
           <div className="min-h-[2rem] line-clamp-2 text-xs">

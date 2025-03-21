@@ -38,6 +38,18 @@ export interface Product {
   ];
 }
 
+export interface ProductImage {
+  id: number;
+  product_id: number;
+  image_url: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProductDetails extends Product {
+  product_images: ProductImage[];
+}
+
 export interface ProductListConfig {
   page?: number | string;
   limit?: number | string;

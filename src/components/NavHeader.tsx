@@ -64,7 +64,7 @@ export default function NavHeader() {
         renderPopover={
           <div className="bg-white relative shadow-md rounded-sm border border-gray-200">
             <Link
-              to="/profile"
+              to="/user/profile"
               className="block py-3 px-4 hover:bg-slate-100 bg-white hover:text-cyan-500 w-full text-left"
             >
               Tài khoản của tôi
@@ -87,7 +87,7 @@ export default function NavHeader() {
         <div className="w-5 h-5 mr-2 flex-shrink-0"></div>
         <div>vung@gmail.com</div>
       </Popover>
-      { !token &&
+      {!token && (
         <div className="flex items-center">
           <Link
             to={path.register}
@@ -100,7 +100,7 @@ export default function NavHeader() {
             Đăng nhập
           </Link>
         </div>
-      }
+      )}
     </div>
   );
 }
