@@ -11,10 +11,9 @@ import { Category } from "../../interface/category.interface";
 
 export default function HomePage() {
   const queryConfig = useQueryConfig();
-  console.log(queryConfig)
+  // console.log(queryConfig)
   const [products, setProducts] = useState<Products>()
   const [categories, setCategories] = useState<Category[]>([]);
-  console.log(products)
     const getProduct = async () => {
         const result = await productApi.getProduct(
           queryConfig as ProductListConfig

@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Product as TypeProduct } from "../interface/product.interface";
 import path from "../constants/path";
 import { generateNameId } from "../utils/utils";
+import ProductRating from "./ProductRating";
 
 export default function Product({ product }: { product: TypeProduct }) {
   return (
@@ -29,7 +30,7 @@ export default function Product({ product }: { product: TypeProduct }) {
           </div>
           <div className="flex items-center mt-3">
             <div className="line-through max-w-[50%] text-gray-500 truncate">
-              <span className="text-xs">đ</span>
+              <span className="text-sm">đ</span>
               <span className="text-sm">{product.oldprice}</span>
             </div>
             <div className="text-orange truncate ml-1">
@@ -38,7 +39,7 @@ export default function Product({ product }: { product: TypeProduct }) {
             </div>
           </div>
           <div className="mt-3 flex items-center justify-end">
-            {/* <ProductRating rating={product.rating} /> */}
+            <ProductRating rating={product.rating} />
             <div className="ml-2 text-sm">
               <span>12</span>
               <span className="ml-1">Đã bán</span>

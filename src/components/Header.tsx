@@ -1,9 +1,48 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Link } from "react-router-dom";
 import NavHeader from "./NavHeader";
 // import path from "@/constants/path";
 import Popover from "./Popover";
+import { useEffect, useState } from "react";
+import cartApi from "../apis/cartApis";
+import { getFromLocalStorage } from "../utils/storage";
+import { StorageKeys } from "../constants/storageKeys";
+import { RootState } from "../store";
+import { useSelector } from "react-redux";
+import { Product } from "../interface/product.interface";
+import { formatCurrency } from "../utils/utils";
+
+interface data {
+  id: number;
+  session_id?: number;
+  user_id: number;
+  created_at: string;
+  updated_at: string;
+  cart_items: {
+    id: number;
+    cart_id: string;
+    product: Product;
+    quantity: number;
+    created_at: string;
+    updated_at: string;
+  }[];
+};
+
 
 export default function Header() {
+  const { token } = useSelector((state: RootState) => state.account);
+  const [cartDetails, setCartDeatil] = useState<data>();
+const cartInfo = getFromLocalStorage(StorageKeys.CART);
+  const fetchCartDetails = async () => {
+    const result = await cartApi.cartDetail(cartInfo?.data.id as number);
+    setCartDeatil(result.data);
+  };
+console.log(cartDetails?.cart_items)
+  useEffect(() => {
+    if (token) {
+      fetchCartDetails()
+    }
+  }, [token])
   return (
     <div className="pb-5 pt-2 bg-[linear-gradient(-180deg,#f53d2d,#f63)] text-white ">
       <div className="layout">
@@ -45,11 +84,37 @@ export default function Header() {
           <div className="col-span-1 justify-self-end items-center mt-2">
             <Popover
               renderPopover={
-                <div className="bg-white relative max-w-[400px] shadow-md rounded-sm border border-gray-200">
+                <div className="bg-white relative max-w-[400px] shadow-md rounded-sm border border-gray-200 p-2">
+                  {cartDetails && cartDetails?.cart_items
+                    .slice(0, 5)
+                    .map((pruchase) => (
+                      <div
+                        className="mt-2 py-2 flex hover:bg-gray-100"
+                        key={pruchase.id}
+                      >
+                        <div className="flex-shrink-0">
+                          <img
+                            src={pruchase.product.image}
+                            alt={pruchase.product.name}
+                            className="w-11 h-11 object-cover"
+                          />
+                        </div>
+                        <div className="flex-grow ml-2  overflow-hidden">
+                          <div className="truncate">
+                            {pruchase.product.name}
+                          </div>
+                        </div>
+                        <div className="ml-2 flex-shrink-0">
+                          <span className="text-orange">
+                            đ{formatCurrency(Number(pruchase.product.price))}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
                 </div>
               }
             >
-              <Link to="/" className="relative">
+              <Link to="/cart" className="relative">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"

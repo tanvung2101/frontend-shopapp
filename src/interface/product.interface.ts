@@ -9,46 +9,58 @@ export interface Products {
 export interface Product {
   id: number;
   name: string;
-  price:number;
+  price: string;
   oldprice: number;
   image: string;
   description: string;
   specification: string;
-  buyturn: number;
-  quantity: number;
+  stock: number;
+  rating: number;
+  total_ratings: number;
+  total_sold: number;
   brand_id: number;
   category_id: number;
   created_at: string;
   updated_at: string;
-  attributes: [
-    {
-      id: number;
-      product_id: number;
-      attribute_id: number;
-      value: number;
-      created_at: string;
-      updated_at: string;
-      Attribute: {
-        id: number;
-        name: string;
-        created_at: string;
-        updated_at: string;
-      };
-    }
-  ];
+  // attributes: [
+  //   {
+  //     id: number;
+  //     product_id: number;
+  //     attribute_id: number;
+  //     value: number;
+  //     created_at: string;
+  //     updated_at: string;
+  //     Attribute: {
+  //       id: number;
+  //       name: string;
+  //       created_at: string;
+  //       updated_at: string;
+  //     };
+  //   }
+  // ];
 }
 
 export interface ProductImage {
   id: number;
-  product_id: number;
   image_url: string;
-  created_at: string;
-  updated_at: string;
 }
 
 export interface ProductDetails extends Product {
   product_images: ProductImage[];
+  category: Category;
+  brand: Brand;
+  attributes: { id: number; name: string; value: string }[];
 }
+
+interface Category {
+  id: number;
+  name: string;
+}
+interface Brand {
+  id: number;
+  name: string;
+}
+
 
 export interface ProductListConfig {
   page?: number | string;

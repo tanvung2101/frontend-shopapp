@@ -32,8 +32,8 @@ function NotRequireAuth() {
 }
 
 function ProtectedRoute() {
-  const { token, info } = useSelector((state: RootState) => state.account);
-  console.log(info)
+  const { token } = useSelector((state: RootState) => state.account);
+  console.log(token)
   return token ? <Outlet /> : <Navigate to={path.login} />;
 }
 

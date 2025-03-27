@@ -1,8 +1,5 @@
 import { useSelector } from "react-redux";
 import { RootState } from "../../store";
-import Input from "../../components/Input";
-import { Controller } from "react-hook-form";
-import InputNumber from "../../components/InputNumber";
 import Button from "../../components/Button";
 
 export default function Profile() {

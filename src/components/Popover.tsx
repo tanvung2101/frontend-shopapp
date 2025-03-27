@@ -15,7 +15,6 @@ interface Props {
 export default function Popover({ children,className, renderPopover }: Props) {
     const arrowRef = useRef(null);
     const [isOpen, setIsOpen] = useState(false);
-    console.log('isopen', isOpen)
     const { refs, floatingStyles, context } = useFloating({
       open: isOpen,
       onOpenChange: setIsOpen,
