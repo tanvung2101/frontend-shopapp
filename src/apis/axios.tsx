@@ -83,7 +83,6 @@ axiosInstance.interceptors.request.use(
 
       const newToken = await refreshToken()
       config.headers.Authorization = `Bearer ${newToken}`;
-      console.log(config)
       return config
     }
 

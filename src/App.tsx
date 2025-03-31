@@ -19,6 +19,8 @@ import path from './constants/path';
 import ProductDetail from './pages/ProductDetail';
 import UserLayout from './components/UserLayout/UserLayout';
 import Profile from './pages/Profile/Profile';
+import CartLayout from './components/CartLayout';
+import Cart from './pages/Cart';
 
 function NotRequireAuth() {
   const { token } = useSelector((state: RootState) => state.account);
@@ -51,14 +53,14 @@ function App() {
       path: "",
       element: <ProtectedRoute />,
       children: [
-        // {
-        //   path: path.cart,
-        //   element: (
-        //     <CartLayout>
-        //       <Cart />
-        //     </CartLayout>
-        //   ),
-        // },
+        {
+          path: path.cart,
+          element: (
+            <CartLayout>
+              <Cart />
+            </CartLayout>
+          ),
+        },
         {
           path: path.user,
           element: (

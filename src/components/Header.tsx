@@ -11,6 +11,7 @@ import { RootState } from "../store";
 import { useSelector } from "react-redux";
 import { Product } from "../interface/product.interface";
 import { formatCurrency } from "../utils/utils";
+import path from "../constants/path";
 
 interface data {
   id: number;
@@ -28,7 +29,7 @@ interface data {
   }[];
 };
 
-
+const MAX_PURCHASE = 5
 export default function Header() {
   const { token } = useSelector((state: RootState) => state.account);
   const [cartDetails, setCartDeatil] = useState<data>();
@@ -37,7 +38,7 @@ const cartInfo = getFromLocalStorage(StorageKeys.CART);
     const result = await cartApi.cartDetail(cartInfo?.data.id as number);
     setCartDeatil(result.data);
   };
-console.log(cartDetails?.cart_items)
+// console.log(cartDetails?.cart_items)
   useEffect(() => {
     if (token) {
       fetchCartDetails()
@@ -84,37 +85,64 @@ console.log(cartDetails?.cart_items)
           <div className="col-span-1 justify-self-end items-center mt-2">
             <Popover
               renderPopover={
-                <div className="bg-white relative max-w-[400px] shadow-md rounded-sm border border-gray-200 p-2">
-                  {cartDetails && cartDetails?.cart_items
-                    .slice(0, 5)
-                    .map((pruchase) => (
-                      <div
-                        className="mt-2 py-2 flex hover:bg-gray-100"
-                        key={pruchase.id}
-                      >
-                        <div className="flex-shrink-0">
-                          <img
-                            src={pruchase.product.image}
-                            alt={pruchase.product.name}
-                            className="w-11 h-11 object-cover"
-                          />
-                        </div>
-                        <div className="flex-grow ml-2  overflow-hidden">
-                          <div className="truncate">
-                            {pruchase.product.name}
-                          </div>
-                        </div>
-                        <div className="ml-2 flex-shrink-0">
-                          <span className="text-orange">
-                            đ{formatCurrency(Number(pruchase.product.price))}
-                          </span>
-                        </div>
+                <div className="bg-white relative max-w-[400px] shadow-md rounded-sm border border-gray-200">
+                  {cartDetails && cartDetails.cart_items?.length > 0 ? (
+                    <div className="p-2">
+                      <div className="text-gray-400 capitalize">
+                        Sản phẩm mới thêm
                       </div>
-                    ))}
+                      <div className="mt5">
+                        {cartDetails.cart_items.slice(0, 5).map((pruchase) => (
+                          <div
+                            className="mt-2 py-2 flex hover:bg-gray-100"
+                            key={pruchase.id}
+                          >
+                            <div className="flex-shrink-0">
+                              <img
+                                src={pruchase.product.image}
+                                alt={pruchase.product.name}
+                                className="w-11 h-11 object-cover"
+                              />
+                            </div>
+                            <div className="flex-grow ml-2  overflow-hidden">
+                              <div className="truncate">
+                                {pruchase.product.name}
+                              </div>
+                            </div>
+                            <div className="ml-2 flex-shrink-0">
+                              <span className="text-orange">
+                                đ
+                                {formatCurrency(Number(pruchase.product.price))}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex mt-6 items-center justify-between">
+                        <div className="capitalize text-xstext-gray-500">
+                          {cartDetails.cart_items.length > MAX_PURCHASE
+                            ? cartDetails.cart_items.length - MAX_PURCHASE
+                            : ""}{" "}
+                          Thêm vào giỏ hàng
+                        </div>
+                        <Link
+                          to={path.cart}
+                          className="capitalize bg-orange hover:bg-opacity-90 px-4 py-2 rounded-sm text-white"
+                        >
+                          Xem giỏ hàng
+                        </Link>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center flex-col w-[300px] h-[300x] p-2">
+                      <img src={""} alt="no-product" className="h-24 w-24" />
+                      <div className="mt-3 capitalize">chưa có sản phẩm</div>
+                    </div>
+                  )}
                 </div>
               }
             >
-              <Link to="/cart" className="relative">
+              <Link to="/" className="relative">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -129,6 +157,11 @@ console.log(cartDetails?.cart_items)
                     d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
                   />
                 </svg>
+                {cartDetails && cartDetails.cart_items.length > 0 && (
+                  <span className="absolute -top-2 -right-3 rounded-full bg-white px-[9px] py-[1px] text-orange text-xs">
+                    {cartDetails.cart_items.length}
+                  </span>
+                )}
               </Link>
             </Popover>
           </div>

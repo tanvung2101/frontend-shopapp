@@ -1,5 +1,7 @@
-import { LoginData, LoginResponse, RegisterData, RegisterResponse } from "../interface/auth.interface";
+import { LoginData, LoginResponse, Profile, RegisterData, RegisterResponse } from "../interface/auth.interface";
 import axiosInstance from "./axios";
+
+export type UpdateUser = Omit<Profile, "id" | "role"| "email">;
 
 const accountApis = {
   login(payload: LoginData): Promise<LoginResponse> {
@@ -16,6 +18,9 @@ const accountApis = {
     password: string;
   }): Promise<RegisterResponse> {
     return axiosInstance.post("users/rest-password", payload);
+  },
+  updateUser(payload:UpdateUser, userId: number): Promise<{message: string, data: Profile}> {
+    return axiosInstance.put(`users/${userId}`, payload,);
   },
 };
 

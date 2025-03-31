@@ -42,7 +42,6 @@ const accountSlice = createSlice({
 
 const { actions, reducer } = accountSlice;
 
-export const {logout, setToken, setInfoLogin } =
-  actions;
+export const { logout, setToken, setInfoLogin, setProfileAuth } = actions;
 
 export default reducer;

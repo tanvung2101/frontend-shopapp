@@ -28,8 +28,8 @@ export interface RegisterResponse {
 export interface Profile {
     id: number;
     email: string;
-    name: string;
-    role: 2;
-    avatar: string;
-    phone: string | undefined;
+    name?: string;
+    role: number;
+    avatar?: string;
+    phone?: string ;
 }
