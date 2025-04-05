@@ -21,6 +21,7 @@ import UserLayout from './components/UserLayout/UserLayout';
 import Profile from './pages/Profile/Profile';
 import CartLayout from './components/CartLayout';
 import Cart from './pages/Cart';
+import ChangePassword from './pages/ChangePassword/index.ts/ChangePassword';
 
 function NotRequireAuth() {
   const { token } = useSelector((state: RootState) => state.account);
@@ -73,10 +74,10 @@ function App() {
               path: path.profile,
               element: <Profile />,
             },
-            // {
-            //   path: path.changePassword,
-            //   element: <ChangePassword />,
-            // },
+            {
+              path: path.changePassword,
+              element: <ChangePassword />,
+            },
             // {
             //   path: path.historyPurchase,
             //   element: <HistoryPurchase />,

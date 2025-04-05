@@ -5,7 +5,7 @@ import { RootState } from "../store";
 import { useSelector } from "react-redux";
 
 export default function NavHeader() {
-  const token = useSelector((state: RootState) => state.account.token);
+  const {token, info} = useSelector((state: RootState) => state.account);
   return (
     <div className="flex justify-end">
       <Popover
@@ -84,8 +84,10 @@ export default function NavHeader() {
           </div>
         }
       >
-        <div className="w-5 h-5 mr-2 flex-shrink-0"></div>
-        <div>vung@gmail.com</div>
+        <div className="w-5 h-5 mr-2 flex-shrink-0 rounded-full">
+          <img className="rounded-full" src={ info?.avatar} />
+        </div>
+        <div>{ info?.email}</div>
       </Popover>
       {!token && (
         <div className="flex items-center">

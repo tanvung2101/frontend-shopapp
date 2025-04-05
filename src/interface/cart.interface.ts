@@ -1,3 +1,5 @@
+import { Product } from "./product.interface";
+
 export interface Cart {
   message: string;
   data: {
@@ -8,3 +10,12 @@ export interface Cart {
     updated_at: string;
   };
 }
+
+export interface CartItems {
+    id: number;
+    cart_id: string;
+    product: Product;
+    quantity: number;
+    created_at: string;
+    updated_at: string;
+  }

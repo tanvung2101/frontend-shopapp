@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { Link } from "react-router-dom";
 import NavHeader from "./NavHeader";
-// import path from "@/constants/path";
 import Popover from "./Popover";
 import { useEffect, useState } from "react";
 import cartApi from "../apis/cartApis";
@@ -12,21 +11,15 @@ import { useSelector } from "react-redux";
 import { Product } from "../interface/product.interface";
 import { formatCurrency } from "../utils/utils";
 import path from "../constants/path";
+import { CartItems } from "../interface/cart.interface";
 
-interface data {
+export interface data {
   id: number;
   session_id?: number;
   user_id: number;
   created_at: string;
   updated_at: string;
-  cart_items: {
-    id: number;
-    cart_id: string;
-    product: Product;
-    quantity: number;
-    created_at: string;
-    updated_at: string;
-  }[];
+  cart_items: CartItems[];
 };
 
 const MAX_PURCHASE = 5

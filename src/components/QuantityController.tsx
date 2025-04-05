@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import { useEffect, useState } from "react";
 import InputNumber, { InputNumberProps } from "./InputNumber";
 
@@ -58,7 +59,6 @@ export default function QuantityController({
   };
 
   const handleBlur = (event: React.FocusEvent<HTMLInputElement, Element>) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     onFocusOut && onFocusOut(Number(event.target.value));
   };
   return (
