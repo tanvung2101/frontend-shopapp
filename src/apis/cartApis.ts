@@ -41,7 +41,7 @@ const cartApi = {
       updated_at: string;
     };
   }> {
-    console.log("Dữ liệu gửi lên API:", body);
+    // console.log("Dữ liệu gửi lên API:", body);
     return axiosInstance.post(`cart-items`, body);
   },
   cartDetail(cart_id: number): Promise<cartDetail> {

@@ -10,6 +10,8 @@ import path from "../../constants/path";
 import { generateNameId } from "../../utils/utils";
 import Button from "../../components/Button";
 import { CartItems } from "../../interface/cart.interface";
+import QuantityController from "../../components/QuantityController";
+import { useMutation } from "@tanstack/react-query";
 
 export interface ExtendedCartItems extends CartItems {
   disabled: boolean;
@@ -27,7 +29,7 @@ export interface ExtendedPurchase {
 
 export default function Cart() {
   const { token } = useSelector((state: RootState) => state.account);
-  const [extendedPurchase, setExtendedPurchase ] = useState<ExtendedPurchase>();
+  const [extendedPurchase, setExtendedPurchase] = useState<ExtendedPurchase>();
   const [purchases, SetPurchase] = useState<data>();
   const cartInfo = getFromLocalStorage(StorageKeys.CART);
   const isAllChecked = useMemo(
@@ -38,7 +40,14 @@ export default function Cart() {
     const result = await cartApi.cartDetail(cartInfo?.data.id as number);
     SetPurchase(result.data);
   };
-  console.log(purchases)
+  const updatePurchaseMutation = useMutation({
+    mutationFn: cartApi.cartItem,
+    onSuccess: (data) => {
+      // refetch()
+      console.log(data)
+      fetchCartDetails()
+    }
+  })
   // console.log(cartDetails?.cart_items)
   useEffect(() => {
     if (token) {
@@ -67,13 +76,13 @@ export default function Cart() {
       setExtendedPurchase((prev) =>
         prev
           ? {
-              ...prev,
-              cart_items: prev.cart_items.map((item, index) =>
-                index === purchaseIndex
-                  ? { ...item, checked: event.target.checked }
-                  : item
-              ),
-            }
+            ...prev,
+            cart_items: prev.cart_items.map((item, index) =>
+              index === purchaseIndex
+                ? { ...item, checked: event.target.checked }
+                : item
+            ),
+          }
           : prev
       );
     };
@@ -90,6 +99,31 @@ export default function Cart() {
       };
     });
   };
+
+  const handleQuantity = (purchaseIndex: number, value: number, enable: boolean) => {
+    // console.log(value)
+    if (enable) {
+      console.log(enable)
+      const purchase = extendedPurchase?.cart_items[purchaseIndex]
+      setExtendedPurchase(
+        (prev) => {
+          if (!prev) return prev;
+          const newCartItems = [...prev.cart_items];
+          newCartItems[purchaseIndex] = {
+            ...newCartItems[purchaseIndex],
+            disabled: true,
+          };
+
+          return {
+            ...prev,
+            cart_items: newCartItems,
+          };
+        }
+      )
+      // console.log(purchase)
+      updatePurchaseMutation.mutate({ product_id: purchase?.product.id as number, cart_id: Number(purchase?.cart_id) , quantity: value})
+    }
+  }
 
 
   return (
@@ -179,34 +213,34 @@ export default function Cart() {
                           </div>
                         </div>
                         <div className="col-span-1">
-                          {/* <QuantityController
-                            max={purchase.product.quantity}
-                            value={purchase.buy_count}
+                          <QuantityController
+                            max={purchase.product.stock}
+                            value={purchase.quantity}
                             classNameWrapper="flex items-center"
                             onIncrease={(value) =>
                               handleQuantity(
                                 index,
                                 value,
-                                value <= purchase.product.quantity
+                                value <= purchase.product.stock
                               )
                             }
                             onDecrease={(value) =>
                               handleQuantity(index, value, value >= 1)
                             }
-                            onFocusOut={(value) =>
-                              handleQuantity(
-                                index,
-                                value,
-                                value >= 1 &&
-                                  value <= purchase.product.quantity &&
-                                  value !==
-                                    (purchasesInCart as Purchase[])[index]
-                                      .buy_count
-                              )
-                            }
-                            onType={handleTypeQuantity(index)}
+                            // onFocusOut={(value) =>
+                            //   handleQuantity(
+                            //     index,
+                            //     value,
+                            //     value >= 1 &&
+                            //       value <= purchase.product.quantity &&
+                            //       value !==
+                            //         (purchasesInCart as Purchase[])[index]
+                            //           .buy_count
+                            //   )
+                            // }
+                            // onType={handleTypeQuantity(index)}
                             disabled={purchase.disabled}
-                          /> */}
+                          />
                         </div>
                         <div className="col-span-1">
                           <span className=" text-orange">
@@ -251,7 +285,7 @@ export default function Cart() {
             </button>
             <button
               className="mx-3 border-none bg-none"
-              // onClick={() => handleDeleteManyPurchases()}
+            // onClick={() => handleDeleteManyPurchases()}
             >
               Xoá
             </button>
@@ -260,7 +294,7 @@ export default function Cart() {
             <div>
               <div className="flex items-center sm:justify-end">
                 <div className="">
-                  Tổng thanh toán ({} sản phẩm):
+                  Tổng thanh toán ({ } sản phẩm):
                 </div>
                 <div className="ml-2 text-2xl text-orange">
                   {/* đ{formatCurrency(totalCheckedPurchasePrice)} */}
