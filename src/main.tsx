@@ -10,13 +10,16 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query'
 const queryClient = new QueryClient()
+import { AppProvider } from './contexts/app.context'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
-        <App />
-        <ToastContainer/>
+        <AppProvider>
+          <App />
+        </AppProvider>
+        <ToastContainer />
       </Provider>
     </QueryClientProvider>
   </StrictMode>,

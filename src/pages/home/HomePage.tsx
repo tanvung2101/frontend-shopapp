@@ -24,11 +24,13 @@ export default function HomePage() {
       const data = await categoryApi.getCategory();
     setCategories(data.data)
   };
+  useEffect(() => {
+    fetchCategories();
+  }, []);
     useEffect(() => {
       getProduct()
-      fetchCategories()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [queryConfig.page, queryConfig.category, queryConfig.price_min, queryConfig.price_max, queryConfig.sort_price])
+    }, [queryConfig.page, queryConfig.category, queryConfig.price_min, queryConfig.price_max, queryConfig.sort_price, queryConfig.name])
   return (
     <div className="bg-gray-200 py-6">
       <div className="layout">

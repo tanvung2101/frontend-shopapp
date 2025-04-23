@@ -18,4 +18,21 @@ export interface CartItems {
     quantity: number;
     created_at: string;
     updated_at: string;
-  }
+    disabled?: boolean;
+    checked?: boolean;
+}
+
+export interface CartDetails 
+  {
+    "message": string,
+    "data": [
+        {
+            "id": number,
+            "session_id": number,
+            "user_id": number,
+            "created_at": string,
+            "updated_at": string,
+            "cart_items": CartItems[]
+        }
+    ]
+}

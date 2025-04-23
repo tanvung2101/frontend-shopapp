@@ -8,10 +8,10 @@ import { getFromLocalStorage } from "../utils/storage";
 import { StorageKeys } from "../constants/storageKeys";
 import { RootState } from "../store";
 import { useSelector } from "react-redux";
-import { Product } from "../interface/product.interface";
 import { formatCurrency } from "../utils/utils";
 import path from "../constants/path";
 import { CartItems } from "../interface/cart.interface";
+import useSearchProducts from "../hooks/useSearchProducts";
 
 export interface data {
   id: number;
@@ -24,16 +24,17 @@ export interface data {
 
 const MAX_PURCHASE = 5
 export default function Header() {
-  const { token } = useSelector((state: RootState) => state.account);
+  const { token, info } = useSelector((state: RootState) => state.account);
+  const {onSubmitSearch, register} = useSearchProducts()
   const [cartDetails, setCartDeatil] = useState<data>();
 const cartInfo = getFromLocalStorage(StorageKeys.CART);
   const fetchCartDetails = async () => {
     const result = await cartApi.cartDetail(cartInfo?.data.id as number);
+    console.log(result)
     setCartDeatil(result.data);
   };
-// console.log(cartDetails?.cart_items)
   useEffect(() => {
-    if (token) {
+    if (info?.id && cartInfo?.data.id) {
       fetchCartDetails()
     }
   }, [token])
@@ -49,13 +50,13 @@ const cartInfo = getFromLocalStorage(StorageKeys.CART);
               </g>
             </svg>
           </Link>
-          <form className="col-span-9">
+          <form className="col-span-9" onSubmit={onSubmitSearch}>
             <div className="bg-white rounded-sm p-1 flex">
               <input
                 type="text"
                 className="text-black px-3 py-2 flex-grow border-none outline-none bg-transparent"
                 placeholder="Free Ship Đơn Từ 0Đ"
-                // {...register("name")}
+                {...register("name")}
               />
               <button className="rounded-sm py-2 px-6 flex-shrink-0 bg-orange hover:opacity-90">
                 <svg

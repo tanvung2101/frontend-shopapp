@@ -22,6 +22,7 @@ import Profile from './pages/Profile/Profile';
 import CartLayout from './components/CartLayout';
 import Cart from './pages/Cart';
 import ChangePassword from './pages/ChangePassword/index.ts/ChangePassword';
+import HistoryPurchase from './pages/HistoryPurchase';
 
 function NotRequireAuth() {
   const { token } = useSelector((state: RootState) => state.account);
@@ -78,10 +79,10 @@ function App() {
               path: path.changePassword,
               element: <ChangePassword />,
             },
-            // {
-            //   path: path.historyPurchase,
-            //   element: <HistoryPurchase />,
-            // },
+            {
+              path: path.historyPurchase,
+              element: <HistoryPurchase />,
+            },
           ],
         },
       ],

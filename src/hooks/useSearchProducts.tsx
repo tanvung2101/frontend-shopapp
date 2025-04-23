@@ -1,14 +1,19 @@
-import { schema, Schema } from 'src/utils/rules'
 import useQueryConfig from './useQueryConfig'
 import { createSearchParams, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { omit } from 'lodash'
-import path from 'src/constants/path'
+import * as yup from 'yup'
+import path from '../constants/path'
 
-type FromData = Pick<Schema, 'name'>
 
-const nameSchema = schema.pick(['name'])
+type FromData = {
+  name?: string
+}
+
+const nameSchema = yup.object({
+  name: yup.string().optional()
+})
 
 export default function useSearchProducts() {
   const queryConfig = useQueryConfig()
@@ -21,7 +26,7 @@ export default function useSearchProducts() {
   })
 
   const onSubmitSearch = handleSubmit((data) => {
-    const config = queryConfig.order
+    const config = queryConfig.name
       ? omit(
           {
             ...queryConfig,

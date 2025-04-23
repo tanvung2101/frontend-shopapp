@@ -1,4 +1,4 @@
-import { Cart } from "../interface/cart.interface";
+import { Cart, CartDetails } from "../interface/cart.interface";
 import { Product } from "../interface/product.interface";
 import axiosInstance from "./axios";
 
@@ -26,6 +26,9 @@ const cartApi = {
     console.log("Dữ liệu gửi lên API:", body);
     return axiosInstance.post(`carts`, body);
   },
+  getCarts(): Promise<cartDetail> {
+    return axiosInstance.get(`carts`);
+  },
   cartItem(body: {
     cart_id: number;
     product_id: number;
@@ -47,5 +50,22 @@ const cartApi = {
   cartDetail(cart_id: number): Promise<cartDetail> {
     return axiosInstance.get(`carts/${cart_id}`);
   },
+  deleteCartItem(id: number): Promise<{message: string}> {
+    return axiosInstance.delete(`/cart-items/${id}`);
+  },
+  buyProduct(body: { cart_id: number, total: number, note?: string, payment: number, bankCode?: string, cart_item_ids: number[] }):Promise<{
+    "message": string,
+    "data": {
+        "id": number,
+        "user_id": number,
+        "session_id"?: number,
+        "status": number,
+        "total": number,
+        "updated_at": string,
+        "created_at": string
+    }
+}>{
+    return axiosInstance.post(`/carts/checkout`, body)
+  }
 };
 export default cartApi;

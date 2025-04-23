@@ -1,21 +1,24 @@
 import { useSelector } from "react-redux";
 import { RootState } from "../../store";
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { getFromLocalStorage } from "../../utils/storage";
 import { StorageKeys } from "../../constants/storageKeys";
 import cartApi from "../../apis/cartApis";
 import { data } from "../../components/Header";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import path from "../../constants/path";
 import { generateNameId } from "../../utils/utils";
 import Button from "../../components/Button";
 import { CartItems } from "../../interface/cart.interface";
 import QuantityController from "../../components/QuantityController";
 import { useMutation } from "@tanstack/react-query";
+import {keyBy} from 'lodash'
+import { toast } from "react-toastify";
+import { AppContext } from "../../contexts/app.context";
 
 export interface ExtendedCartItems extends CartItems {
-  disabled: boolean;
-  checked: boolean;
+  disabled?: boolean;
+  checked?: boolean;
 }
 
 export interface ExtendedPurchase {
@@ -29,26 +32,91 @@ export interface ExtendedPurchase {
 
 export default function Cart() {
   const { token } = useSelector((state: RootState) => state.account);
-  const [extendedPurchase, setExtendedPurchase] = useState<ExtendedPurchase>();
+  const { extendedPurchase, setExtendedPurchase } = useContext(AppContext)
+  const location = useLocation()
+  const choosePurchaseIdFromLocation = (location.state as { purchaseId: number } | null)?.purchaseId
   const [purchases, SetPurchase] = useState<data>();
-  const cartInfo = getFromLocalStorage(StorageKeys.CART);
   const isAllChecked = useMemo(
     () => extendedPurchase?.cart_items.every((purchase) => purchase.checked),
     [extendedPurchase]
   );
+  console.log(extendedPurchase)
   const fetchCartDetails = async () => {
-    const result = await cartApi.cartDetail(cartInfo?.data.id as number);
-    SetPurchase(result.data);
+    const result = await cartApi.getCarts();
+    if (result?.data) {
+      SetPurchase(result.data);
+      return result.data;
+    }
+    if(!result.data){
+      localStorage.removeItem('cart')
+    }
+    return null;
   };
+  // const fetchCartDetails1 = async () => {
+  //   const result = await cartApi.getCarts();
+  //   console.log(result)
+  // };
   const updatePurchaseMutation = useMutation({
     mutationFn: cartApi.cartItem,
     onSuccess: (data) => {
       // refetch()
-      console.log(data)
+      // console.log(data)
       fetchCartDetails()
     }
   })
-  // console.log(cartDetails?.cart_items)
+  
+  const deleteCartItemMutation = useMutation({
+    mutationFn: cartApi.deleteCartItem, // nhớ tạo API tương ứng
+    onSuccess: async () => {
+      const cart = await fetchCartDetails()
+  
+      if (!cart) {
+        localStorage.removeItem('cart') 
+      }
+    }
+  })
+
+  const buyProductsMutation = useMutation({
+    mutationFn: cartApi.buyProduct,
+    onSuccess: async () => {
+      const cart = await fetchCartDetails()
+  
+      if (!cart) {
+        localStorage.removeItem('cart') 
+        setExtendedPurchase(undefined)
+      }
+    },
+  });
+  
+  
+  
+
+  const checkedPurchases = () => {
+    return extendedPurchase?.cart_items.filter((item) => item.checked) || [];
+  };
+
+  const totalCheckedPurchasePrice = checkedPurchases().reduce(
+    (acc, item) => acc + (item.product.price as number) * (item.quantity as number),
+    0
+  );
+
+  const calculateTotalSaving = () => {
+    if (!extendedPurchase) return 0;
+  
+    const totalSaving = extendedPurchase.cart_items.reduce((total, item) => {
+      if (item.checked && item.product.oldprice && item.product.price) {
+        const saving = item.product.oldprice - item.product.price;
+        return total + saving * item.quantity;
+      }
+      return total;
+    }, 0);
+  
+    return totalSaving;
+  };
+  
+  
+  
+
   useEffect(() => {
     if (token) {
       fetchCartDetails();
@@ -56,17 +124,22 @@ export default function Cart() {
   }, [token]);
   useEffect(() => {
     if (purchases?.id && purchases?.user_id) {
+      const extendedPurchasesObject = keyBy(extendedPurchase?.cart_items, 'id');
+
       setExtendedPurchase({
         id: purchases.id,
         session_id: purchases.session_id,
         user_id: purchases.user_id,
         created_at: purchases.created_at ?? "",
         updated_at: purchases.updated_at ?? "",
-        cart_items: purchases.cart_items.map((pur) => ({
-          ...pur,
-          disabled: false,
-          checked: false,
-        })),
+        cart_items: purchases.cart_items.map((pur) => {
+          const isChoosePurchaseIdFromLocation = choosePurchaseIdFromLocation === pur.product.id
+          return ({
+            ...pur,
+            disabled: false,
+            checked: isChoosePurchaseIdFromLocation || Boolean(extendedPurchasesObject[pur.id]?.checked),
+          })
+        }),
       });
     }
   }, [purchases]);
@@ -103,7 +176,6 @@ export default function Cart() {
   const handleQuantity = (purchaseIndex: number, value: number, enable: boolean) => {
     // console.log(value)
     if (enable) {
-      console.log(enable)
       const purchase = extendedPurchase?.cart_items[purchaseIndex]
       setExtendedPurchase(
         (prev) => {
@@ -125,10 +197,84 @@ export default function Cart() {
     }
   }
 
+  const handleTypeQuantity = (purchaseIndex: number) => (value: number) => {
+    setExtendedPurchase(
+      (prev) => {
+        if (!prev) return prev;
+        const newCartItems = [...prev.cart_items];
+        newCartItems[purchaseIndex] = {
+          ...newCartItems[purchaseIndex],
+          quantity: value,
+        };
+
+        return {
+          ...prev,
+          cart_items: newCartItems,
+        };
+      }
+    )
+  }
+
+  const handleDelete = (purchaseIndex: number) => () => {
+    const purchase = extendedPurchase?.cart_items[purchaseIndex];
+    if (purchase?.id) {
+      deleteCartItemMutation.mutate(purchase.id);
+      toast.success("Đã xoá sản phẩm");
+    }
+  };
+  
+
+  const handleDeleteManyPurchases = () => {
+    if (!extendedPurchase) return;
+  
+    const checkedItems = extendedPurchase.cart_items.filter((item) => item.checked);
+  
+    if (checkedItems.length === 0) {
+      toast.warn("Vui lòng chọn sản phẩm để xoá!");
+      return;
+    }
+  
+    const deletePromises = checkedItems.map((item) =>
+      cartApi.deleteCartItem(item.id as number)
+    );
+  
+    Promise.all(deletePromises)
+      .then(() => {
+        toast.success("Đã xoá các sản phẩm đã chọn");
+        fetchCartDetails();
+      })
+      .catch((error) => {
+        console.error(error);
+        toast.error("Có lỗi xảy ra khi xoá sản phẩm");
+      });
+  };
+
+  const handleBuyPurchase = async () => {
+    const selectedItems = checkedPurchases();
+  
+    if (selectedItems.length > 0 && extendedPurchase) {
+      console.log(extendedPurchase)
+      const cart_item_ids = selectedItems.map((item) => item.id);
+      const total = totalCheckedPurchasePrice;
+  
+      buyProductsMutation.mutate({
+        cart_id: extendedPurchase.id as number,
+        total,
+        payment: 1, // hoặc 1 nếu bạn xử lý VNPay
+        cart_item_ids,
+      });
+    } else {
+      toast.warn("Vui lòng chọn sản phẩm để mua!");
+    }
+  };
+  
+  
+
 
   return (
     <div className="bg-neutral-100 py-16">
-      <div className="layout">
+      {extendedPurchase ? <>
+        <div className="layout">
         <div className="overflow-auto">
           <div className="min-w-[1000px]">
             <div className="grid grid-cols-12 rounded-sm bg-white py-5 px-9 text-sm capitalize text-gray-500 shadow">
@@ -227,18 +373,17 @@ export default function Cart() {
                             onDecrease={(value) =>
                               handleQuantity(index, value, value >= 1)
                             }
-                            // onFocusOut={(value) =>
-                            //   handleQuantity(
-                            //     index,
-                            //     value,
-                            //     value >= 1 &&
-                            //       value <= purchase.product.quantity &&
-                            //       value !==
-                            //         (purchasesInCart as Purchase[])[index]
-                            //           .buy_count
-                            //   )
-                            // }
-                            // onType={handleTypeQuantity(index)}
+                            onFocusOut={(value) =>
+                              handleQuantity(
+                                index,
+                                value,
+                                value >= 1 &&
+                                  value <= purchase.product.stock &&
+                                  value !==
+                                    purchases?.cart_items[index].quantity
+                              )
+                            }
+                            onType={handleTypeQuantity(index)}
                             disabled={purchase.disabled}
                           />
                         </div>
@@ -251,7 +396,7 @@ export default function Cart() {
                         </div>
                         <div className="col-span-1">
                           <button
-                            // onClick={handleDelete(index)}
+                            onClick={handleDelete(index)}
                             className="bg-none text-black transition-colors hover:text-orange"
                           >
                             Xoá
@@ -281,11 +426,11 @@ export default function Cart() {
               className="mx-3 border-none bg-none"
               onClick={handleCheckAll}
             >
-              {/* Chọn tất cả ({extendedPurchase.length}) */}
+              Chọn tất cả ({extendedPurchase?.cart_items.length})
             </button>
             <button
               className="mx-3 border-none bg-none"
-            // onClick={() => handleDeleteManyPurchases()}
+            onClick={() => handleDeleteManyPurchases()}
             >
               Xoá
             </button>
@@ -294,7 +439,7 @@ export default function Cart() {
             <div>
               <div className="flex items-center sm:justify-end">
                 <div className="">
-                  Tổng thanh toán ({ } sản phẩm):
+                  Tổng thanh toán ({ totalCheckedPurchasePrice} sản phẩm):
                 </div>
                 <div className="ml-2 text-2xl text-orange">
                   {/* đ{formatCurrency(totalCheckedPurchasePrice)} */}
@@ -304,11 +449,12 @@ export default function Cart() {
                 <div className="text-gray-500">Tiệt kiểm</div>
                 <div className="ml-6 text-orange">
                   {/* đ{formatCurrency(totalCheckedPurchaseSavingPrice)} */}
+                  {calculateTotalSaving()}
                 </div>
               </div>
             </div>
             <Button
-              // onClick={handleBuyPurchase}
+              onClick={handleBuyPurchase}
               // disabled={buyProductsMutation.isLoading}
               className="mt-5 flex h-10 w-52 items-center justify-center bg-red-500 text-sm uppercase text-white hover:bg-red-600 sm:ml-4 sm:mt-0"
             >
@@ -317,6 +463,7 @@ export default function Cart() {
           </div>
         </div>
       </div>
+      </>: <div></div>}
     </div>
   );
 }

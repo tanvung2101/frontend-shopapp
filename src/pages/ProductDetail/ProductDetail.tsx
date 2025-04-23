@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   formatCurrency,
   formatNumberToSocialStyles,
@@ -16,9 +16,11 @@ import { StorageKeys } from "../../constants/storageKeys";
 import ProductRating from "../../components/ProductRating";
 import InputNumber from "../../components/InputNumber";
 import { toast } from "react-toastify";
+import path from "../../constants/path";
 
 export default function ProductDetail() {
   const { nameId } = useParams();
+  const navigate = useNavigate()
   const { info } = useSelector((state: RootState) => state.account);
   const id = getIdFromNameId(nameId as string);
   const [productDetail, setProductDetail] = useState<ProductDetails>();
@@ -103,6 +105,30 @@ export default function ProductDetail() {
       toast.success("Thêm sản phẩm thành công")
       console.log(result)
     }
+  }
+
+  const buyNow = async () => {
+    if (!info) {
+      toast.warning("Bạn chưa đăng nhập")
+      return
+    }
+    if (cartInfo?.data && productDetail) {
+      const body: {
+        cart_id: number;
+        product_id: number;
+        quantity: number;
+      } = { cart_id: cartInfo?.data.id, product_id: productDetail?.id, quantity};
+      console.log(body)
+      const result = await cartApi.cartItem(body)
+      console.log(result)
+      navigate(path.cart, {
+        state: {
+          purchaseId: productDetail.id
+        }
+      })
+    }
+    // const res = await addToCartMutation.mutateAsync({ buy_count: buyCount, product_id: product?._id as string })
+    // const purchase = res.data.data
   }
   return (
     <div className="bg-gray-200 py-6">
@@ -321,7 +347,7 @@ export default function ProductDetail() {
                     Thêm vào giỏ hàng
                   </button>
                   <button
-                    // onClick={buyNow}
+                    onClick={buyNow}
                     className="flex ml-4 h-12 min-w-[5rem] items-center justify-center rounded-sm bg-orange px-5 capitalize text-white shadow-sm outline-none hover:bg-orange/90"
                   >
                     Mua ngay

@@ -1,3 +1,5 @@
+
+
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { storage } from "../../utils/storage";
 import { Profile } from "../../interface/auth.interface";
@@ -42,6 +44,6 @@ const accountSlice = createSlice({
 
 const { actions, reducer } = accountSlice;
 
-export const { logout, setToken, setInfoLogin, setProfileAuth } = actions;
+export const { logout,setInfoLogin, setProfileAuth,setToken } = actions;
 
 export default reducer;
