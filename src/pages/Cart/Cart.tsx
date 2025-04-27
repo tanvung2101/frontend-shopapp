@@ -43,6 +43,7 @@ export default function Cart() {
   console.log(extendedPurchase)
   const fetchCartDetails = async () => {
     const result = await cartApi.getCarts();
+    console.log(result)
     if (result?.data) {
       SetPurchase(result.data);
       return result.data;
@@ -118,10 +119,8 @@ export default function Cart() {
   
 
   useEffect(() => {
-    if (token) {
       fetchCartDetails();
-    }
-  }, [token]);
+  }, []);
   useEffect(() => {
     if (purchases?.id && purchases?.user_id) {
       const extendedPurchasesObject = keyBy(extendedPurchase?.cart_items, 'id');

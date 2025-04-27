@@ -90,11 +90,12 @@ export default function ProductDetail() {
     }
   };
   const addToCart = async () => {
-    if (!info) {
+    if (!info?.id) {
       toast.warning("Bạn chưa đăng nhập")
+      navigate(path.login)
       return
     }
-    if (cartInfo?.data && productDetail) {
+    if (cartInfo?.data && productDetail?.id) {
       const body: {
         cart_id: number;
         product_id: number;
@@ -108,8 +109,9 @@ export default function ProductDetail() {
   }
 
   const buyNow = async () => {
-    if (!info) {
+    if (!info?.id) {
       toast.warning("Bạn chưa đăng nhập")
+      navigate(path.login)
       return
     }
     if (cartInfo?.data && productDetail) {

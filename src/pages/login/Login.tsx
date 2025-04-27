@@ -12,6 +12,7 @@ import { useDispatch } from "react-redux";
 import { AppDispatch} from "../../store";
 import { setInfoLogin } from "../../store/slices/accountSlice";
 import { storage } from "../../utils/storage";
+import { toast } from "react-toastify";
 // import { storage } from "../../utils/storage";
 
 interface FormValues {
@@ -70,6 +71,7 @@ export default function Login() {
         .catch((error: any) => {
           // errorHelper(err);
           console.log(error);
+          toast.error(error.response.data.message)
         })
         .finally(() => {
           setLoading(false);

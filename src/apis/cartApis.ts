@@ -66,6 +66,6 @@ const cartApi = {
     }
 }>{
     return axiosInstance.post(`/carts/checkout`, body)
-  }
+  },
 };
 export default cartApi;

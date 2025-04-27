@@ -1,11 +1,26 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Popover from "./Popover";
 import path from "../constants/path";
-import { RootState } from "../store";
-import { useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../store";
+import { useDispatch, useSelector } from "react-redux";
+import accountApis from "../apis/authApis";
+import { logout } from "../store/slices/accountSlice";
+
 
 export default function NavHeader() {
   const {token, info} = useSelector((state: RootState) => state.account);
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate()
+
+  const handleLogout = async () => {
+    const userLogout = await accountApis.logout()
+    if(userLogout){
+      dispatch(logout())
+      navigate('/') 
+    }
+  }
+
+  
   return (
     <div className="flex justify-end">
       <Popover
@@ -76,7 +91,7 @@ export default function NavHeader() {
               Đơn mua
             </Link>
             <button
-              // onClick={handleLogout}
+              onClick={handleLogout}
               className="block py-3 px-4 hover:bg-slate-100 bg-white hover:text-cyan-500 w-full text-left"
             >
               Đăng xuất

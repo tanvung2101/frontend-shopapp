@@ -29,6 +29,8 @@ const accountSlice = createSlice({
     logout(state) {
       state.token = "";
       state.info = null;
+      storage.clearInfo()
+      storage.clearToken()
     },
     setInfoLogin(
       state,

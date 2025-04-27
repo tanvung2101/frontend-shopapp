@@ -22,6 +22,9 @@ const accountApis = {
   updateUser(payload:UpdateUser, userId: number): Promise<{message: string, data: Profile}> {
     return axiosInstance.put(`users/${userId}`, payload,);
   },
+  logout():Promise<{message: string}>{
+    return axiosInstance.get('users/logout')
+  }
 };
 
 export default accountApis
