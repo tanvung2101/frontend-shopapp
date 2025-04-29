@@ -27,7 +27,7 @@ export interface ExtendedPurchase {
 };
 
 export default function Cart() {
-  const { isAuthenticated } = useContext(AppContext)
+  // const { isAuthenticated } = useContext(AppContext)
   const { extendedPurchase, setExtendedPurchase } = useContext(AppContext)
   const location = useLocation()
   const choosePurchaseIdFromLocation = (location.state as { purchaseId: number } | null)?.purchaseId
@@ -55,7 +55,7 @@ export default function Cart() {
   // };
   const updatePurchaseMutation = useMutation({
     mutationFn: cartApi.updateCartItem,
-    onSuccess: (data) => {
+    onSuccess: () => {
       // refetch()
       // console.log(data)
       fetchCartDetails()

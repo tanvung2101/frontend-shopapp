@@ -1,5 +1,3 @@
-import React from 'react'
-
 export default function RatingStars() {
   return (
     <ul className="my-3">
