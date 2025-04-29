@@ -1,21 +1,25 @@
 import { Link, useNavigate } from "react-router-dom";
 import Popover from "./Popover";
 import path from "../constants/path";
-import { AppDispatch, RootState } from "../store";
-import { useDispatch, useSelector } from "react-redux";
 import accountApis from "../apis/authApis";
-import { logout } from "../store/slices/accountSlice";
+import { useContext } from "react";
+import { AppContext } from "../contexts/app.context";
+import { storage } from "../utils/storage";
 
 
 export default function NavHeader() {
-  const {token, info} = useSelector((state: RootState) => state.account);
-  const dispatch = useDispatch<AppDispatch>();
+  const { isAuthenticated, profile,setProfile, setIsAuthenticated } = useContext(AppContext)
   const navigate = useNavigate()
-
+  console.log(profile)
+  console.log(isAuthenticated)
   const handleLogout = async () => {
     const userLogout = await accountApis.logout()
     if(userLogout){
-      dispatch(logout())
+      setProfile(null)
+      setIsAuthenticated(false)
+      storage.clearInfo()
+      storage.clearToken()
+      storage.clearCart()
       navigate('/') 
     }
   }
@@ -100,11 +104,11 @@ export default function NavHeader() {
         }
       >
         <div className="w-5 h-5 mr-2 flex-shrink-0 rounded-full">
-          <img className="rounded-full" src={ info?.avatar} />
+          <img className="rounded-full" src={ profile?.avatar} />
         </div>
-        <div>{ info?.email}</div>
+        <div>{ profile?.email}</div>
       </Popover>
-      {!token && (
+      {!isAuthenticated && (
         <div className="flex items-center">
           <Link
             to={path.register}

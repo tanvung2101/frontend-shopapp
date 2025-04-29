@@ -2,16 +2,14 @@ import { Link, useNavigate } from "react-router-dom";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import * as yup from "yup";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import accountApis from "../../apis/authApis";
 import axiosInstance from "../../apis/axios";
 import { LoginResponse } from "../../interface/auth.interface";
-import { useDispatch } from "react-redux";
-import { AppDispatch} from "../../store";
-import { setInfoLogin } from "../../store/slices/accountSlice";
 import { storage } from "../../utils/storage";
+import { AppContext } from "../../contexts/app.context";
 import { toast } from "react-toastify";
 // import { storage } from "../../utils/storage";
 
@@ -40,7 +38,7 @@ const schema = yup
 
 export default function Login() {
   const [loading, setLoading] = useState<boolean>();
-  const dispatch = useDispatch<AppDispatch>();
+  const { setProfile, setIsAuthenticated } = useContext(AppContext)
     const navigate = useNavigate();
     const {
       handleSubmit,
@@ -61,10 +59,11 @@ export default function Login() {
           axiosInstance.defaults.headers.common = {
             Authorization: `Bearer ${data.access_token}`,
           };
-          dispatch(setInfoLogin({ token: data.access_token , info: data.data}));
+          setProfile(data.data)
+          setIsAuthenticated(true)
           storage.setToken(data.access_token)
+          storage.setInfo(data.data)
           navigate("/");
-          // storage.setToken(STORAGE_KEY.TOKEN, token);
           // storage.setUser(STORAGE_KEY.INFO, JSON.stringify(user));
         })
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

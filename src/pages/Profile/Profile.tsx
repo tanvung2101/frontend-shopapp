@@ -1,19 +1,17 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
-import { AppDispatch, RootState } from "../../store";
 import imageApi from "../../apis/imageApis";
 import Button from "../../components/Button";
 import InputFile from "../../components/InputFile";
 import Input from "../../components/Input";
 import InputNumber from "../../components/InputNumber";
 import accountApis, { UpdateUser } from "../../apis/authApis";
-import { setProfileAuth } from "../../store/slices/accountSlice";
 import { storage } from "../../utils/storage";
+import { AppContext } from "../../contexts/app.context";
 
 const userSchema = yup.object({
   name: yup.string().max(160, "Độ dài tối đa là 160 ký tự").optional(),
@@ -28,9 +26,9 @@ type FormData = {
   avatar?: string | undefined;
 };
 export default function Profile() {
-  const { info } = useSelector((state: RootState) => state.account);
+  const { profile, setProfile } = useContext(AppContext)
   const [file, setFile] = useState<File>();
-  const dispatch = useDispatch<AppDispatch>();
+  // const dispatch = useDispatch<AppDispatch>();
 
   const {
     control,
@@ -39,22 +37,22 @@ export default function Profile() {
     setValue,
   } = useForm<FormData>({
     defaultValues: {
-      name: info?.name,
-      phone: info?.phone || "",
+      name: profile?.name,
+      phone: profile?.phone || "",
       address: "",
-      avatar: info?.avatar || "",
+      avatar: profile?.avatar || "",
     },
     resolver: yupResolver(userSchema),
   });
   const updateProfile = async (user: UpdateUser, userId: number) => {
     const data = await accountApis.updateUser(user, userId);
     console.log(data)
-    dispatch(setProfileAuth({ info: data.data }));
+    setProfile(data.data)
     storage.setInfo(data.data)
   };
   const onSubmit = handleSubmit(async (data) => {
     console.log(data);
-    await updateProfile(data, info?.id as number)
+    await updateProfile(data, profile?.id as number)
   });
   const handleChangeFile = (file?: File) => {
     setFile(file);
@@ -97,7 +95,7 @@ export default function Profile() {
               email
             </div>
             <div className="sm:w-[80%] sm:pl-5">
-              <div className="pt-3 text-gray-700">{info?.email}</div>
+              <div className="pt-3 text-gray-700">{profile?.email}</div>
             </div>
           </div>
           <div className="mt-6 flex flex-wrap flex-col sm:flex-row">
@@ -199,7 +197,7 @@ export default function Profile() {
             <div className="my-5 h-24 w-24">
               <img
                 src={
-                  info?.avatar ? info?.avatar : previewImage ? previewImage : ""
+                  profile?.avatar ? profile?.avatar : previewImage ? previewImage : ""
                 }
                 alt="hh"
                 className="w-full h-full rounded-full object-cover"

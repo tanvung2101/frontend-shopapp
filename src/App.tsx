@@ -3,7 +3,6 @@ import {
   createBrowserRouter,
   RouterProvider,
   Navigate,
-  useLocation,
   Outlet,
 } from "react-router-dom";
 import Login from './pages/login';
@@ -13,8 +12,6 @@ import ForgotPassword from './pages/forgot-password';
 import RestPassword from './pages/reset-password';
 import MainLayout from './components/MainLayout';
 import HomePage from './pages/home/HomePage';
-import { useSelector } from 'react-redux';
-import { RootState } from './store';
 import path from './constants/path';
 import ProductDetail from './pages/ProductDetail';
 import UserLayout from './components/UserLayout/UserLayout';
@@ -23,23 +20,20 @@ import CartLayout from './components/CartLayout';
 import Cart from './pages/Cart';
 import ChangePassword from './pages/ChangePassword/index.ts/ChangePassword';
 import HistoryPurchase from './pages/HistoryPurchase';
+import { useContext } from 'react';
+import { AppContext } from './contexts/app.context';
 
 function NotRequireAuth() {
-  const { token } = useSelector((state: RootState) => state.account);
-  const location = useLocation();
-
-  if (token) {
-    return <Navigate to="/" state={{ from: location }} replace />;
-  }
-
-  return <Outlet/>;
+  const { isAuthenticated } = useContext(AppContext);
+  return !isAuthenticated ? <Outlet /> : <Navigate to={path.home} />;
 }
+
 
 function ProtectedRoute() {
-  const { token } = useSelector((state: RootState) => state.account);
-  console.log(token)
-  return token ? <Outlet /> : <Navigate to={path.login} />;
+  const { isAuthenticated } = useContext(AppContext);
+  return isAuthenticated ? <Outlet /> : <Navigate to={path.login} />;
 }
+
 
 function App() {
   const router = createBrowserRouter([
@@ -127,7 +121,6 @@ function App() {
     },
     {
       path: path.productDetail,
-      index: true,
       element: (
         <MainLayout>
           <ProductDetail />

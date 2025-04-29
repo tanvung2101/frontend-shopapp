@@ -52,8 +52,6 @@ export default function ForgotPassword() {
           .then(function (data) {
               console.log(data)
               navigate(path.login)
-          // storage.setToken(STORAGE_KEY.TOKEN, token);
-          // storage.setUser(STORAGE_KEY.INFO, JSON.stringify(user));
         })
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .catch((error: any) => {

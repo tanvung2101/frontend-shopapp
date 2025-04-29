@@ -2,16 +2,15 @@
 import { Link } from "react-router-dom";
 import NavHeader from "./NavHeader";
 import Popover from "./Popover";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import cartApi from "../apis/cartApis";
 import { getFromLocalStorage } from "../utils/storage";
 import { StorageKeys } from "../constants/storageKeys";
-import { RootState } from "../store";
-import { useSelector } from "react-redux";
 import { formatCurrency } from "../utils/utils";
 import path from "../constants/path";
 import { CartItems } from "../interface/cart.interface";
 import useSearchProducts from "../hooks/useSearchProducts";
+import { AppContext } from "../contexts/app.context";
 
 export interface data {
   id: number;
@@ -24,7 +23,7 @@ export interface data {
 
 const MAX_PURCHASE = 5
 export default function Header() {
-  const { token, info } = useSelector((state: RootState) => state.account);
+  const { isAuthenticated, profile } = useContext(AppContext)
   const {onSubmitSearch, register} = useSearchProducts()
   const [cartDetails, setCartDeatil] = useState<data>();
 const cartInfo = getFromLocalStorage(StorageKeys.CART);
@@ -34,10 +33,10 @@ const cartInfo = getFromLocalStorage(StorageKeys.CART);
     setCartDeatil(result.data);
   };
   useEffect(() => {
-    if (info?.id && cartInfo?.data.id) {
+    if (profile?.id && cartInfo?.data.id) {
       fetchCartDetails()
     }
-  }, [token])
+  }, [isAuthenticated])
   return (
     <div className="pb-5 pt-2 bg-[linear-gradient(-180deg,#f53d2d,#f63)] text-white ">
       <div className="layout">

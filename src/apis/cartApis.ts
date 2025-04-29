@@ -1,4 +1,4 @@
-import { Cart, CartDetails } from "../interface/cart.interface";
+import { Cart } from "../interface/cart.interface";
 import { Product } from "../interface/product.interface";
 import axiosInstance from "./axios";
 
@@ -46,6 +46,24 @@ const cartApi = {
   }> {
     // console.log("Dữ liệu gửi lên API:", body);
     return axiosInstance.post(`cart-items`, body);
+  },
+  updateCartItem(body: {
+    cart_id: number;
+    product_id: number;
+    quantity: number;
+  }): Promise<{
+    message: string;
+    data: {
+      id: number;
+      cart_id: number;
+      product_id: number;
+      quantity: number;
+      created_at: string;
+      updated_at: string;
+    };
+  }> {
+    // console.log("Dữ liệu gửi lên API:", body);
+    return axiosInstance.post(`cart-items/update`, body);
   },
   cartDetail(cart_id: number): Promise<cartDetail> {
     return axiosInstance.get(`carts/${cart_id}`);

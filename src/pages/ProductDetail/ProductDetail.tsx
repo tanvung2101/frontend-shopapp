@@ -6,10 +6,8 @@ import {
   rateSale,
 } from "../../utils/utils";
 import productApi from "../../apis/productApi";
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { ProductDetails } from "../../interface/product.interface";
-import { useSelector } from "react-redux";
-import { RootState } from "../../store";
 import cartApi from "../../apis/cartApis";
 import { getFromLocalStorage, saveToLocalStorage } from "../../utils/storage";
 import { StorageKeys } from "../../constants/storageKeys";
@@ -17,11 +15,12 @@ import ProductRating from "../../components/ProductRating";
 import InputNumber from "../../components/InputNumber";
 import { toast } from "react-toastify";
 import path from "../../constants/path";
+import { AppContext } from "../../contexts/app.context";
 
 export default function ProductDetail() {
   const { nameId } = useParams();
   const navigate = useNavigate()
-  const { info } = useSelector((state: RootState) => state.account);
+  const { profile } = useContext(AppContext)
   const id = getIdFromNameId(nameId as string);
   const [productDetail, setProductDetail] = useState<ProductDetails>();
   const [currentIndexImage, setCurrentIndexImage] = useState([0, 5]);
@@ -40,28 +39,26 @@ export default function ProductDetail() {
     setProductDetail(result.data);
   };
   const initializeCart = async () => {
-    const userId = String(info?.id); // Lấy thông tin user_id từ local storage
+    const userId = String(profile?.id); // Lấy thông tin user_id từ local storage
     if (!userId) {
       console.log("User chưa đăng nhập hoặc chưa có ID.");
       return;
     }
-    if (cartInfo?.data) {
-      console.log("Giỏ hàng đã tồn tại:", cartInfo);
-      return; // Không cần gửi API createCart nữa
-    }
+    // if (cartInfo?.data) {
+    //   console.log("Giỏ hàng đã tồn tại:", cartInfo);
+    //   return; // Không cần gửi API createCart nữa
+    // }
     const cartData = await cartApi.createCart({ user_id: userId });
     saveToLocalStorage(StorageKeys.CART, cartData);
   };
   useEffect(() => {
     fetchProductById();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     initializeCart();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nameId, info]);
+  }, [nameId, profile]);
 
   const next = () => {
     if (
@@ -90,7 +87,7 @@ export default function ProductDetail() {
     }
   };
   const addToCart = async () => {
-    if (!info?.id) {
+    if (!profile?.id) {
       toast.warning("Bạn chưa đăng nhập")
       navigate(path.login)
       return
@@ -109,7 +106,7 @@ export default function ProductDetail() {
   }
 
   const buyNow = async () => {
-    if (!info?.id) {
+    if (!profile?.id) {
       toast.warning("Bạn chưa đăng nhập")
       navigate(path.login)
       return

@@ -1,8 +1,4 @@
-import { useSelector } from "react-redux";
-import { RootState } from "../../store";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { getFromLocalStorage } from "../../utils/storage";
-import { StorageKeys } from "../../constants/storageKeys";
 import cartApi from "../../apis/cartApis";
 import { data } from "../../components/Header";
 import { Link, useLocation } from "react-router-dom";
@@ -31,7 +27,7 @@ export interface ExtendedPurchase {
 };
 
 export default function Cart() {
-  const { token } = useSelector((state: RootState) => state.account);
+  const { isAuthenticated } = useContext(AppContext)
   const { extendedPurchase, setExtendedPurchase } = useContext(AppContext)
   const location = useLocation()
   const choosePurchaseIdFromLocation = (location.state as { purchaseId: number } | null)?.purchaseId
@@ -58,7 +54,7 @@ export default function Cart() {
   //   console.log(result)
   // };
   const updatePurchaseMutation = useMutation({
-    mutationFn: cartApi.cartItem,
+    mutationFn: cartApi.updateCartItem,
     onSuccess: (data) => {
       // refetch()
       // console.log(data)
@@ -173,7 +169,6 @@ export default function Cart() {
   };
 
   const handleQuantity = (purchaseIndex: number, value: number, enable: boolean) => {
-    // console.log(value)
     if (enable) {
       const purchase = extendedPurchase?.cart_items[purchaseIndex]
       setExtendedPurchase(
