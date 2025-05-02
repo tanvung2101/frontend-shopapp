@@ -46,7 +46,7 @@ axiosInstance.interceptors.request.use(
     }
 
     try {
-      const { data } = await axios.get<AuthResponse>(`users/refresh-token`, { withCredentials: true });
+      const { data } = await axiosInstance.get<AuthResponse>(`users/refresh-token`, { withCredentials: true });
 
       if (data?.access_token) {
         storage.setToken(data.access_token);
