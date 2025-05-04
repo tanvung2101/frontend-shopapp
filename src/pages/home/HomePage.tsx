@@ -13,6 +13,7 @@ export default function HomePage() {
   const queryConfig = useQueryConfig();
   // console.log(queryConfig)
   const [products, setProducts] = useState<Products>()
+  console.log(products)
   const [categories, setCategories] = useState<Category[]>([]);
     const getProduct = async () => {
         const result = await productApi.getProduct(

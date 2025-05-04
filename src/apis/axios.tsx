@@ -1,16 +1,25 @@
-// import { storage } from "@/utils/storage";
 import axios from "axios";
 import { storage } from "../utils/storage";
 import { jwtDecode } from "jwt-decode";
 import dayjs from "dayjs";
 
+const BASE_URL = "http://13.213.103.160/api/";
+
 const axiosInstance = axios.create({
-  baseURL: "http://13.213.103.160/api/",
+  baseURL: BASE_URL,
   headers: {
-    "content-type": "application/json",
+    "Content-Type": "application/json",
   },
   withCredentials: true,
-  // paramsSerializer: params => queryString.stringify(params)
+});
+
+// Instance riêng cho gọi refresh-token (không có interceptor)
+const rawAxios = axios.create({
+  baseURL: BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+  withCredentials: true,
 });
 
 interface AuthResponse {
@@ -24,41 +33,40 @@ interface AuthResponse {
   };
   access_token: string;
 }
-let ac_token = storage.getToken() || "";
 
+// Interceptor cho request
 axiosInstance.interceptors.request.use(
   async (config) => {
-    if (!ac_token) ac_token = storage.getToken() || '';
+    let accessToken = storage.getToken();
 
-    if (ac_token) {
-      config.headers.set('Authorization', `Bearer ${ac_token}`);
-
+    if (accessToken) {
       try {
-        const user: { exp: number; sub: string; iat: number } = jwtDecode(ac_token);
-
+        const user: { exp: number; sub: string; iat: number } = jwtDecode(accessToken);
         const isExpired = dayjs.unix(user.exp).diff(dayjs()) < 1;
 
-        if (!isExpired) return config;
+        if (!isExpired) {
+          config.headers.set("Authorization", `Bearer ${accessToken}`);
+          return config;
+        }
       } catch (error) {
-        console.error('Invalid token:', error);
-        // Token decode lỗi -> xuống dưới refresh
+        console.warn("Token decode failed:", error);
+        // Nếu lỗi thì sẽ tiếp tục xuống phần gọi refresh
       }
     }
 
+    // Nếu token hết hạn hoặc chưa có -> gọi refresh
     try {
-      const { data } = await axiosInstance.get<AuthResponse>(`users/refresh-token`, { withCredentials: true });
+      const { data } = await rawAxios.get<AuthResponse>("users/refresh-token");
 
       if (data?.access_token) {
         storage.setToken(data.access_token);
-        ac_token = data.access_token;
-        config.headers.set('Authorization', `Bearer ${data.access_token}`);
+        config.headers.set("Authorization", `Bearer ${data.access_token}`);
       } else {
-        // console.error('Refresh token failed: no access token');
-        storage.clearToken;
-        ac_token = '';
+        storage.clearToken();
       }
-    } catch (error) {
-      return Promise.reject(error);
+    } catch (err) {
+      console.error("Refresh token failed:", err);
+      storage.clearToken();
     }
 
     return config;
@@ -66,19 +74,12 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-
-
-
+// Interceptor cho response
 axiosInstance.interceptors.response.use(
-  (response) => {
-    if (response && response.data) {
-      return response.data;
-    }
-    return response;
-  },
+  (response) => response.data,
   (error) => {
-    // Handle errors
-    throw error;
+    // Xử lý lỗi toàn cục nếu cần (ví dụ: thông báo lỗi, logout...)
+    return Promise.reject(error);
   }
 );
 

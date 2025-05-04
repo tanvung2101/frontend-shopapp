@@ -5,6 +5,7 @@ import {
   Navigate,
   Outlet,
 } from "react-router-dom";
+// import { lazy } from 'react';
 import Login from './pages/login';
 import AuthHeader from './components/AuthHeader';
 import Register from './pages/register';
@@ -20,6 +21,8 @@ import CartLayout from './components/CartLayout';
 import Cart from './pages/Cart';
 import ChangePassword from './pages/ChangePassword/index.ts/ChangePassword';
 import HistoryPurchase from './pages/HistoryPurchase';
+
+
 import { useContext } from 'react';
 import { AppContext } from './contexts/app.context';
 
