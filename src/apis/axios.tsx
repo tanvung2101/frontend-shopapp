@@ -3,7 +3,7 @@ import { storage } from "../utils/storage";
 import { jwtDecode } from "jwt-decode";
 import dayjs from "dayjs";
 
-const BASE_URL = "https://shopapp-online.site/";
+const BASE_URL = "https://shopapp-online.site/api/";
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
