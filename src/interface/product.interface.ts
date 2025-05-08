@@ -65,7 +65,7 @@ interface Brand {
 export interface ProductListConfig {
   page?: number | string;
   limit?: number | string;
-  sort_by?: "createdAt" | "view" | "sold" | "price";
+  sort_by?: "created_at" | "view" | "sold" | "price";
   sort_price?: "asc" | "desc";
   exclude?: string;
   rating_filter?: number | string;

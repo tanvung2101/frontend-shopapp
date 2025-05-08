@@ -1,4 +1,23 @@
-export default function RatingStars() {
+import { createSearchParams, useNavigate } from "react-router-dom";
+import path from "../constants/path";
+import { QueryConfig } from "../hooks/useQueryConfig";
+
+interface Props {
+  queryConfig: QueryConfig
+}
+
+export default function RatingStars({ queryConfig }: Props) {
+  const navigate = useNavigate()
+
+  const handleFilterStar = (ratingFilter: number) => {
+    navigate({
+      pathname: path.home,
+      search: createSearchParams({
+        ...queryConfig,
+        rating_filter: String(ratingFilter)
+      }).toString()
+    })
+  }
   return (
     <ul className="my-3">
       {Array(5)
@@ -7,7 +26,7 @@ export default function RatingStars() {
           <li className="py-1 pl-2" key={index}>
             <div
               className="flex items-center text-sm cursor-pointer"
-            //   onClick={() => handleFilterStar(5 - index)}
+              onClick={() => handleFilterStar(5 - index)}
               tabIndex={0}
             >
               {Array(5)

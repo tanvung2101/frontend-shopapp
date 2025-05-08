@@ -211,7 +211,7 @@ export default function SideFilter({ queryConfig, categories }: Props) {
       </div>
       <div className="bg-gray-300 h-[1px] my-4"></div>
       <div className="text-sm">Đáng giá</div>
-      <RatingStars />
+      <RatingStars queryConfig={queryConfig}/>
       <div className="bg-gray-300 h-[1px] my-4"></div>
       <Button
         onClick={() => handleRemoveAll()}

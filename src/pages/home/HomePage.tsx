@@ -31,7 +31,7 @@ export default function HomePage() {
     useEffect(() => {
       getProduct()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [queryConfig.page, queryConfig.category, queryConfig.price_min, queryConfig.price_max, queryConfig.sort_price, queryConfig.name])
+    }, [queryConfig.page, queryConfig.category, queryConfig.price_min, queryConfig.price_max, queryConfig.sort_price, queryConfig.name, queryConfig.rating_filter])
   return (
     <div className="bg-gray-200 py-6">
       <div className="layout">

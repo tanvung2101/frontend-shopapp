@@ -5,6 +5,7 @@ import { QueryConfig } from '../hooks/useQueryConfig';
 import { sortBy ,order as orderConstant} from '../constants/product';
 import { ProductListConfig } from '../interface/product.interface';
 import classNames from 'classnames';
+import { omit } from 'lodash';
 
 
 interface Props {
@@ -19,20 +20,20 @@ export default function SortProductList({ pageSize, queryConfig }: Props) {
   const isActiveSortBy = (sortByValue: Exclude<ProductListConfig['sort_by'], undefined>) => {
     return sortByValue === sort_by
   }
-  // const handleSort = (sortByValue: Exclude<ProductListConfig['sort_by'], undefined>) => {
-  //   navigate({
-  //     pathname: path.home,
-  //     search: createSearchParams(
-  //       omit(
-  //         {
-  //           ...queryConfig,
-  //           sort_by: sortByValue
-  //         },
-  //         ['order']
-  //       )
-  //     ).toString()
-  //   })
-  // }
+  const handleSort = (sortByValue: Exclude<ProductListConfig['sort_by'], undefined>) => {
+    navigate({
+      pathname: path.home,
+      search: createSearchParams(
+        omit(
+          {
+            ...queryConfig,
+            sort_by: sortByValue
+          },
+          ['order']
+        )
+      ).toString()
+    })
+  }
   const handlePriceOrder = (
     orderValue: Exclude<ProductListConfig["sort_price"], undefined>
   ) => {
@@ -51,11 +52,11 @@ export default function SortProductList({ pageSize, queryConfig }: Props) {
         <div className="flex flex-wrap items-center gap-2">
           <div>Sắp xếp theo</div>
           <button
-          // className={classNames('h-8 px-4 capitalize text-sm text-center', {
-          //   'bg-orange text-white hover:bg-orange/80': isActiveSortBy(sortBy.view),
-          //   'bg-white text-black hover:bg-slate-100': !isActiveSortBy(sortBy.view)
-          // })}
-          // onClick={() => handleSort(sortBy.view)}
+          className={classNames('h-8 px-4 capitalize text-sm text-center', {
+            'bg-orange text-white hover:bg-orange/80': isActiveSortBy(sortBy.view),
+            'bg-white text-black hover:bg-slate-100': !isActiveSortBy(sortBy.view)
+          })}
+          onClick={() => handleSort(sortBy.view)}
           >
             Phổ biến
           </button>
@@ -68,16 +69,16 @@ export default function SortProductList({ pageSize, queryConfig }: Props) {
                 sortBy.createdAt
               ),
             })}
-            // onClick={() => handleSort(sortBy.createdAt)}
+            onClick={() => handleSort(sortBy.createdAt)}
           >
             mới nhất
           </button>
           <button
-          // className={classNames('h-8 px-4 capitalize text-sm text-center', {
-          //   'bg-orange text-white hover:bg-orange/80': isActiveSortBy(sortBy.sold),
-          //   'bg-white text-black hover:bg-slate-100': !isActiveSortBy(sortBy.sold)
-          // })}
-          // onClick={() => handleSort(sortBy.sold)}
+          className={classNames('h-8 px-4 capitalize text-sm text-center', {
+            'bg-orange text-white hover:bg-orange/80': isActiveSortBy(sortBy.sold),
+            'bg-white text-black hover:bg-slate-100': !isActiveSortBy(sortBy.sold)
+          })}
+          onClick={() => handleSort(sortBy.sold)}
           >
             bán chạy
           </button>
