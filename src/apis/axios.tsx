@@ -4,7 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import dayjs from "dayjs";
 
 const BASE_URL = "https://shopapp-online.site/api/";
-
+// const BASE_URL = "http://localhost:5000/api/";
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
   headers: {
@@ -52,6 +52,9 @@ axiosInstance.interceptors.request.use(
         console.warn("Token decode failed:", error);
         // Nếu lỗi thì sẽ tiếp tục xuống phần gọi refresh
       }
+    }
+    else{
+      return config;
     }
 
     // Nếu token hết hạn hoặc chưa có -> gọi refresh
