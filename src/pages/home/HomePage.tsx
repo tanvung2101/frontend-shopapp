@@ -8,6 +8,7 @@ import useQueryConfig from "../../hooks/useQueryConfig";
 import Pagination from "../../components/Pagination";
 import categoryApi from "../../apis/categoryApi";
 import { Category } from "../../interface/category.interface";
+import ProductSkeleton from "../../components/ProductSkeleton";
 
 export default function HomePage() {
   const queryConfig = useQueryConfig();
@@ -15,23 +16,23 @@ export default function HomePage() {
   const [products, setProducts] = useState<Products>()
   console.log(products)
   const [categories, setCategories] = useState<Category[]>([]);
-    const getProduct = async () => {
-        const result = await productApi.getProduct(
-          queryConfig as ProductListConfig
-        );
-        setProducts(result)
+  const getProduct = async () => {
+    const result = await productApi.getProduct(
+      queryConfig as ProductListConfig
+    );
+    setProducts(result)
   }
   const fetchCategories = async () => {
-      const data = await categoryApi.getCategory();
+    const data = await categoryApi.getCategory();
     setCategories(data.data)
   };
   useEffect(() => {
     fetchCategories();
   }, []);
-    useEffect(() => {
-      getProduct()
+  useEffect(() => {
+    getProduct()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [queryConfig.page, queryConfig.category, queryConfig.price_min, queryConfig.price_max, queryConfig.sort_price, queryConfig.name, queryConfig.rating_filter])
+  }, [queryConfig.page, queryConfig.category, queryConfig.price_min, queryConfig.price_max, queryConfig.sort_price, queryConfig.name, queryConfig.rating_filter])
   return (
     <div className="bg-gray-200 py-6">
       <div className="layout">
@@ -39,8 +40,8 @@ export default function HomePage() {
           <div className="grid grid-cols-12 gap-6">
             <div className="col-span-3">
               <SideFilter
-              queryConfig={queryConfig}
-              categories={categories}
+                queryConfig={queryConfig}
+                categories={categories}
               />
             </div>
             <div className="col-span-9">
@@ -54,6 +55,9 @@ export default function HomePage() {
                     <Product product={product} />
                   </div>
                 ))}
+
+                {!products && Array(10).fill(0).map(() => <div className="col-span-1"><ProductSkeleton></ProductSkeleton></div>)}
+
               </div>
               {products && <Pagination
                 queryConfig={queryConfig}
