@@ -1,38 +1,31 @@
-import { useEffect, useState } from "react";
 import Product from "../../components/Product";
 import SideFilter from "../../components/SideFilter";
 import SortProductList from "../../components/SortProductList";
-import { ProductListConfig, Products } from "../../interface/product.interface";
+import { ProductListConfig } from "../../interface/product.interface";
 import productApi from "../../apis/productApi";
 import useQueryConfig from "../../hooks/useQueryConfig";
 import Pagination from "../../components/Pagination";
 import categoryApi from "../../apis/categoryApi";
-import { Category } from "../../interface/category.interface";
 import ProductSkeleton from "../../components/ProductSkeleton";
+import { useQuery } from "@tanstack/react-query";
 
 export default function HomePage() {
   const queryConfig = useQueryConfig();
-  // console.log(queryConfig)
-  const [products, setProducts] = useState<Products>()
-  console.log(products)
-  const [categories, setCategories] = useState<Category[]>([]);
-  const getProduct = async () => {
-    const result = await productApi.getProduct(
-      queryConfig as ProductListConfig
-    );
-    setProducts(result)
-  }
-  const fetchCategories = async () => {
-    const data = await categoryApi.getCategory();
-    setCategories(data.data)
-  };
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-  useEffect(() => {
-    getProduct()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryConfig.page, queryConfig.category, queryConfig.price_min, queryConfig.price_max, queryConfig.sort_price, queryConfig.name, queryConfig.rating_filter])
+  const { data: productsData, isLoading, } = useQuery({
+    queryKey: ['products', queryConfig],
+    queryFn: () => {
+      return productApi.getProduct(queryConfig as ProductListConfig)
+    },
+    placeholderData: (previousData) => previousData,
+    staleTime: 3 * 60 * 1000
+  })
+  const { data: categories, } = useQuery({
+    queryKey: ['category'],
+    queryFn: () => {
+      return categoryApi.getCategory();
+    },
+  })
+
   return (
     <div className="bg-gray-200 py-6">
       <div className="layout">
@@ -41,27 +34,27 @@ export default function HomePage() {
             <div className="col-span-3">
               <SideFilter
                 queryConfig={queryConfig}
-                categories={categories}
+                categories={categories?.data}
               />
             </div>
             <div className="col-span-9">
-              {products && <SortProductList
+              {productsData && <SortProductList
                 queryConfig={queryConfig}
-                pageSize={products.total_pages}
+                pageSize={productsData.total_pages}
               />}
               <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-                {products?.data.map((product) => (
+                {productsData?.data.map((product) => (
                   <div key={product.id} className="col-span-1">
                     <Product product={product} />
                   </div>
                 ))}
 
-                {!products && Array(10).fill(0).map(() => <div className="col-span-1"><ProductSkeleton></ProductSkeleton></div>)}
+                {isLoading && Array(10).fill(0).map(() => <div className="col-span-1"><ProductSkeleton></ProductSkeleton></div>)}
 
               </div>
-              {products && <Pagination
+              {productsData && <Pagination
                 queryConfig={queryConfig}
-                pageSize={products.total_pages}
+                pageSize={productsData.total_pages}
               />}
             </div>
           </div>

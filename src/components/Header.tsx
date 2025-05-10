@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import NavHeader from "./NavHeader";
 import Popover from "./Popover";
-import { useContext, useEffect, useState } from "react";
+import { useContext} from "react";
 import cartApi from "../apis/cartApis";
 import { getFromLocalStorage } from "../utils/storage";
 import { StorageKeys } from "../constants/storageKeys";
@@ -11,6 +11,7 @@ import path from "../constants/path";
 import { CartItems } from "../interface/cart.interface";
 import useSearchProducts from "../hooks/useSearchProducts";
 import { AppContext } from "../contexts/app.context";
+import { useQuery } from "@tanstack/react-query";
 
 export interface data {
   id: number;
@@ -23,20 +24,16 @@ export interface data {
 
 const MAX_PURCHASE = 5
 export default function Header() {
-  const { isAuthenticated, profile } = useContext(AppContext)
+  const { isAuthenticated } = useContext(AppContext)
   const {onSubmitSearch, register} = useSearchProducts()
-  const [cartDetails, setCartDeatil] = useState<data>();
 const cartInfo = getFromLocalStorage(StorageKeys.CART);
-  const fetchCartDetails = async () => {
-    const result = await cartApi.cartDetail(cartInfo?.data.id as number);
-    console.log(result)
-    setCartDeatil(result.data);
-  };
-  useEffect(() => {
-    if (profile?.id && cartInfo?.data.id) {
-      fetchCartDetails()
-    }
-  }, [isAuthenticated])
+
+const { data: cartDetails } = useQuery({
+  queryKey: ['purchases',  cartInfo?.data.id as number],
+  queryFn: () => cartApi.cartDetail(cartInfo?.data.id as number),
+  enabled: Boolean(isAuthenticated) && !!cartInfo?.data.id,
+})
+
   return (
     <div className="pb-5 pt-2 bg-[linear-gradient(-180deg,#f53d2d,#f63)] text-white ">
       <div className="layout">
@@ -79,13 +76,13 @@ const cartInfo = getFromLocalStorage(StorageKeys.CART);
             <Popover
               renderPopover={
                 <div className="bg-white relative max-w-[400px] shadow-md rounded-sm border border-gray-200">
-                  {cartDetails && cartDetails.cart_items?.length > 0 ? (
+                  {cartDetails && cartDetails.data.cart_items?.length > 0 ? (
                     <div className="p-2">
                       <div className="text-gray-400 capitalize">
                         Sản phẩm mới thêm
                       </div>
                       <div className="mt5">
-                        {cartDetails.cart_items.slice(0, 5).map((pruchase) => (
+                        {cartDetails.data.cart_items.slice(0, 5).map((pruchase) => (
                           <div
                             className="mt-2 py-2 flex hover:bg-gray-100"
                             key={pruchase.id}
@@ -113,8 +110,8 @@ const cartInfo = getFromLocalStorage(StorageKeys.CART);
                       </div>
                       <div className="flex mt-6 items-center justify-between">
                         <div className="capitalize text-xstext-gray-500">
-                          {cartDetails.cart_items.length > MAX_PURCHASE
-                            ? cartDetails.cart_items.length - MAX_PURCHASE
+                          {cartDetails.data.cart_items.length > MAX_PURCHASE
+                            ? cartDetails.data.cart_items.length - MAX_PURCHASE
                             : ""}{" "}
                           Thêm vào giỏ hàng
                         </div>
@@ -150,9 +147,9 @@ const cartInfo = getFromLocalStorage(StorageKeys.CART);
                     d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
                   />
                 </svg>
-                {cartDetails && cartDetails.cart_items.length > 0 && (
+                {cartDetails && cartDetails.data.cart_items.length > 0 && (
                   <span className="absolute -top-2 -right-3 rounded-full bg-white px-[9px] py-[1px] text-orange text-xs">
-                    {cartDetails.cart_items.length}
+                    {cartDetails.data.cart_items.length}
                   </span>
                 )}
               </Link>

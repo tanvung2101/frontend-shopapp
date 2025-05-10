@@ -9,6 +9,10 @@ import {
 } from '@tanstack/react-query'
 const queryClient = new QueryClient()
 import { AppProvider } from './contexts/app.context'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+
+
+
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -17,6 +21,7 @@ createRoot(document.getElementById('root')!).render(
           <App />
         </AppProvider>
         <ToastContainer />
+        <ReactQueryDevtools initialIsOpen={true} />
     </QueryClientProvider>
   </StrictMode>,
 )

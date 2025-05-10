@@ -28,7 +28,6 @@ type FormData = {
 export default function Profile() {
   const { profile, setProfile } = useContext(AppContext)
   const [file, setFile] = useState<File>();
-  // const dispatch = useDispatch<AppDispatch>();
 
   const {
     control,

@@ -7,7 +7,6 @@ import {
 } from "../../utils/utils";
 import productApi from "../../apis/productApi";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { ProductDetails } from "../../interface/product.interface";
 import cartApi from "../../apis/cartApis";
 import { getFromLocalStorage, saveToLocalStorage } from "../../utils/storage";
 import { StorageKeys } from "../../constants/storageKeys";
@@ -16,44 +15,47 @@ import InputNumber from "../../components/InputNumber";
 import { toast } from "react-toastify";
 import path from "../../constants/path";
 import { AppContext } from "../../contexts/app.context";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function ProductDetail() {
   const { nameId } = useParams();
+  const queryClient = useQueryClient()
   const navigate = useNavigate()
   const { profile } = useContext(AppContext)
   const id = getIdFromNameId(nameId as string);
-  const [productDetail, setProductDetail] = useState<ProductDetails>();
   const [currentIndexImage, setCurrentIndexImage] = useState([0, 5]);
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState("");
   const cartInfo = getFromLocalStorage(StorageKeys.CART);
+
+  const { data: productDetail } = useQuery({
+    queryKey: ['product', id],
+    queryFn: () => productApi.getProductById(id as string)
+  })
+
+  const createCartMutation = useMutation({
+    mutationFn: (user_id: string) => cartApi.createCart({ user_id }),
+    onSuccess: (data) => {
+      saveToLocalStorage(StorageKeys.CART, data);
+    }
+  });
+
   const currentImages = useMemo(
     () =>
       productDetail
-        ? productDetail.product_images.slice(...currentIndexImage)
+        ? productDetail.data.product_images.slice(...currentIndexImage)
         : [],
     [productDetail, currentIndexImage]
   );
-  const fetchProductById = async () => {
-    const result = await productApi.getProductById(id);
-    setProductDetail(result.data);
+  const initializeCart = () => {
+    const userId = String(profile?.id);
+    if (!userId) return;
+    createCartMutation.mutate(userId);
   };
-  const initializeCart = async () => {
-    const userId = String(profile?.id); // Lấy thông tin user_id từ local storage
-    if (!userId) {
-      console.log("User chưa đăng nhập hoặc chưa có ID.");
-      return;
-    }
-    // if (cartInfo?.data) {
-    //   console.log("Giỏ hàng đã tồn tại:", cartInfo);
-    //   return; // Không cần gửi API createCart nữa
-    // }
-    const cartData = await cartApi.createCart({ user_id: userId });
-    saveToLocalStorage(StorageKeys.CART, cartData);
-  };
-  useEffect(() => {
-    fetchProductById();
-  }, []);
+
+  const addToCartMutation = useMutation({
+    mutationFn: cartApi.cartItem
+  })
 
   useEffect(() => {
     initializeCart();
@@ -63,7 +65,7 @@ export default function ProductDetail() {
   const next = () => {
     if (
       productDetail &&
-      currentIndexImage[1] < productDetail.product_images.length
+      currentIndexImage[1] < productDetail.data.product_images.length
     ) {
       setCurrentIndexImage((prev) => [prev[0] + 1, prev[1] + 1]);
     }
@@ -80,7 +82,7 @@ export default function ProductDetail() {
 
   const updateQuantity = (type: string) => {
     if (type === "plus") {
-      if (+quantity === productDetail?.stock as number) return;
+      if (+quantity === productDetail?.data?.stock as number) return;
       setQuantity(+quantity + 1);
     } else {
       setQuantity(+quantity - 1 < 1 ? 1 : +quantity - 1);
@@ -92,16 +94,19 @@ export default function ProductDetail() {
       navigate(path.login)
       return
     }
-    if (cartInfo?.data && productDetail?.id) {
+    if (cartInfo?.data && productDetail?.data?.id) {
       const body: {
         cart_id: number;
         product_id: number;
         quantity: number;
-      } = { cart_id: cartInfo?.data.id, product_id: productDetail?.id, quantity};
-      console.log(body)
-      const result = await cartApi.cartItem(body)
-      toast.success("Thêm sản phẩm thành công")
-      console.log(result)
+      } = { cart_id: cartInfo?.data.id, product_id: productDetail.data?.id, quantity};
+      addToCartMutation.mutate(body, 
+        {
+          onSuccess: (data) => {
+            toast.success(data.message, { autoClose: 1000 })
+            queryClient.refetchQueries({ queryKey: ['purchases',  cartInfo?.data.id as number ] })
+          }
+        })
     }
   }
 
@@ -116,18 +121,17 @@ export default function ProductDetail() {
         cart_id: number;
         product_id: number;
         quantity: number;
-      } = { cart_id: cartInfo?.data.id, product_id: productDetail?.id, quantity};
+      } = { cart_id: cartInfo?.data.id, product_id: productDetail.data?.id, quantity};
       console.log(body)
       const result = await cartApi.cartItem(body)
+      addToCartMutation.mutate(body)
       console.log(result)
       navigate(path.cart, {
         state: {
-          purchaseId: productDetail.id
+          purchaseId: productDetail.data.id
         }
       })
     }
-    // const res = await addToCartMutation.mutateAsync({ buy_count: buyCount, product_id: product?._id as string })
-    // const purchase = res.data.data
   }
   return (
     <div className="bg-gray-200 py-6">
@@ -139,7 +143,7 @@ export default function ProductDetail() {
                 <div className="relative w-full pt-[100%] shadow">
                   <img
                     src={activeImage || "l"}
-                    alt={productDetail?.name}
+                    alt={productDetail.data?.name}
                     className="absolute top-0 left-0 bg-white w-full h-full object-cover"
                   />
                 </div>
@@ -204,15 +208,15 @@ export default function ProductDetail() {
               </div>
               <div className="col-span-7">
                 <h1 className="text-xl font-medium uppercase">
-                  {productDetail?.name}
+                  {productDetail.data?.name}
                 </h1>
                 <div className="mt-8 flex items-center">
                   <div className="flex items-center">
                     <span className="mr-1 border-b border-b-orange text-orange">
-                      {productDetail?.rating}
+                      {productDetail.data?.rating}
                     </span>
                     <ProductRating
-                      rating={productDetail.rating}
+                      rating={productDetail.data.rating}
                       activeClassName="fill-orange text-orange h-4 w-4"
                       nonActiveClassName="fill-gray-300 text-gray-300 h-4 w-4"
                     />
@@ -220,22 +224,22 @@ export default function ProductDetail() {
                   <div className="mx-4 h-4 w-[1px] bg-gray-300 "></div>
                   <div>
                     <span>
-                      {formatNumberToSocialStyles(productDetail.total_sold)}
+                      {formatNumberToSocialStyles(productDetail.data.total_sold)}
                     </span>
                     <span className="ml-1 text-gray-500">Da ban</span>
                   </div>
                 </div>
                 <div className="mt-8 flex items-center bg-gray-50 px-5 py-4">
                   <div className="text-gray-500 line-through">
-                    d{formatCurrency(productDetail.oldprice)}
+                    d{formatCurrency(productDetail.data.oldprice)}
                   </div>
                   <div className="ml-3 text-3xl font-medium text-orange">
-                    d{formatCurrency(Number(productDetail.price))}
+                    d{formatCurrency(Number(productDetail.data.price))}
                   </div>
                   <div className="ml-4 rounded-sm bg-orange px-1 py-[2px] text-xs font-semibold uppercase text-white">
                     {rateSale(
-                      productDetail?.oldprice as number,
-                      Number(productDetail.price)
+                      productDetail.data?.oldprice as number,
+                      Number(productDetail.data.price)
                     )}
                   </div>
                 </div>
@@ -296,7 +300,7 @@ export default function ProductDetail() {
                     </button>
                   </div>
                   <div className="ml-6 text-sm text-gray-500">
-                    {productDetail.stock} sản phẩm có sẵn
+                    {productDetail.data.stock} sản phẩm có sẵn
                   </div>
                 </div>
                 <div className="mt-8 flex items-center">
@@ -367,7 +371,7 @@ export default function ProductDetail() {
               <div className="mx-4 mt-12 mb-4 text-sm leading-loose">
                 <div
                   dangerouslySetInnerHTML={{
-                    __html: productDetail.description,
+                    __html: productDetail.data.description,
                   }}
                 />
               </div>

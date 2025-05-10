@@ -17,7 +17,7 @@ type FormData = {
 
 interface Props {
   queryConfig: QueryConfig;
-  categories: Category[];
+  categories?: Category[];
 }
 
 const schema = yup.object().shape({
