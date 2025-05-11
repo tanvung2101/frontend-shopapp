@@ -2,11 +2,10 @@ import { Link, useNavigate } from "react-router-dom";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import * as yup from "yup";
-import { useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import accountApis from "../../apis/authApis";
-import { RegisterResponse } from "../../interface/auth.interface";
+import { useMutation } from "@tanstack/react-query";
 
 interface FormValues {
   email: string;
@@ -49,7 +48,7 @@ export default function Register() {
       .trim(),
   });
 
-  const [loading, setLoading] = useState<boolean>();
+
   const navigate = useNavigate();
   const {
     handleSubmit,
@@ -65,27 +64,20 @@ export default function Register() {
     },
   });
 
+  const registerAccountMutation = useMutation({
+    mutationFn: (body: {
+      email: string,
+      name: string,
+      password: string,
+    }) => accountApis.register(body),
+    onSuccess:() => {
+      navigate("/login");
+    }
+  })
+
   const onSubmit: SubmitHandler<FormValues> = (values: FormValues) => {
     const { email, password, name } = values;
-    setLoading(true);
-    accountApis
-      .register({
-        email,
-        name,
-        password,
-      })
-      .then(function (data: RegisterResponse) {
-        console.log(data);
-        navigate("/login");
-      })
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .catch((error: any) => {
-        // errorHelper(err);
-        console.log(error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    registerAccountMutation.mutate({email, password, name})
   };
   return (
     <div className="bg-orange">
@@ -157,8 +149,8 @@ export default function Register() {
               <div className="mt-3">
                 <Button
                   className="w-full py-4 px-2 uppercase bg-red-500 text-white text-sm hover:bg-red-600 flex justify-center items-center gap-2"
-                  isLoading={loading}
-                  disabled={loading}
+                  isLoading={registerAccountMutation.isPending}
+                  disabled={registerAccountMutation.isPending}
                 >
                   Đăng kí
                 </Button>

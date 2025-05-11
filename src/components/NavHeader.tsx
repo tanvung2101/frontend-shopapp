@@ -5,23 +5,25 @@ import accountApis from "../apis/authApis";
 import { useContext } from "react";
 import { AppContext } from "../contexts/app.context";
 import { storage } from "../utils/storage";
+import { useMutation } from "@tanstack/react-query";
 
 
 export default function NavHeader() {
   const { isAuthenticated, profile,setProfile, setIsAuthenticated } = useContext(AppContext)
   const navigate = useNavigate()
-  console.log(profile)
-  console.log(isAuthenticated)
-  const handleLogout = async () => {
-    const userLogout = await accountApis.logout()
-    if(userLogout){
+  const logoutMutation = useMutation({
+    mutationFn: () => accountApis.logout(),
+    onSuccess:() => {
       setProfile(null)
       setIsAuthenticated(false)
       storage.clearInfo()
       storage.clearToken()
       storage.clearCart()
-      navigate('/') 
+      navigate("/");
     }
+  })
+  const handleLogout = async () => {
+    logoutMutation.mutate()
   }
 
   

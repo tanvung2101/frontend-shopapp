@@ -2,16 +2,15 @@ import { Link, useNavigate } from "react-router-dom";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import * as yup from "yup";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import accountApis from "../../apis/authApis";
 import axiosInstance from "../../apis/axios";
-import { LoginResponse } from "../../interface/auth.interface";
 import { storage } from "../../utils/storage";
 import { AppContext } from "../../contexts/app.context";
 import { toast } from "react-toastify";
-// import { storage } from "../../utils/storage";
+import { useMutation } from "@tanstack/react-query";
 
 interface FormValues {
   email: string;
@@ -37,44 +36,38 @@ const schema = yup
 
 
 export default function Login() {
-  const [loading, setLoading] = useState<boolean>();
   const { setProfile, setIsAuthenticated } = useContext(AppContext)
     const navigate = useNavigate();
     const {
       handleSubmit,
       control,
       formState: { errors },
-    } = useForm<FormValues>({ resolver: yupResolver(schema) });
+    } = useForm<FormValues>({ resolver: yupResolver(schema) , defaultValues: {
+      email: '',
+      password: ''
+    }});
 
-    // const onSubmit = handleSubmit((data) => console.log(data))
+    const loginMutation = useMutation({
+      mutationFn: (body: {email: string, password: string}) => accountApis.login(body),
+      onSuccess:(data) => {
+        axiosInstance.defaults.headers.common = {
+          Authorization: `Bearer ${data.access_token}`,
+        };
+        toast.success(data.message)
+        setProfile(data.data)
+        setIsAuthenticated(true)
+        storage.setToken(data.access_token)
+        storage.setInfo(data.data)
+        navigate("/");
+
+      },
+      onError(error,) {
+        toast.error(error.message)
+      },
+    })
+
     const onSubmit: SubmitHandler<FormValues> = (values: FormValues) => {
-      console.log("login", values);
-      setLoading(true);
-      accountApis
-        .login({
-          email: values.email,
-          password: values.password,
-        })
-        .then(function (data: LoginResponse) {
-          axiosInstance.defaults.headers.common = {
-            Authorization: `Bearer ${data.access_token}`,
-          };
-          setProfile(data.data)
-          setIsAuthenticated(true)
-          storage.setToken(data.access_token)
-          storage.setInfo(data.data)
-          navigate("/");
-          // storage.setUser(STORAGE_KEY.INFO, JSON.stringify(user));
-        })
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .catch((error: any) => {
-          // errorHelper(err);
-          console.log(error);
-          toast.error(error.response.data.message)
-        })
-        .finally(() => {
-          setLoading(false);
-        });
+      loginMutation.mutate({email: values.email,password: values.password})
     };
   return (
     <div className="bg-orange">
@@ -118,8 +111,8 @@ export default function Login() {
               <div className="mt-3">
                 <Button
                   className="w-full py-4 px-2 uppercase bg-red-500 text-white text-sm hover:bg-red-600 flex justify-center items-center gap-2"
-                  isLoading={loading}
-                  disabled={loading}
+                  isLoading={loginMutation.isPending}
+                  disabled={loginMutation.isPending}
                 >
                   Đăng nhập
                 </Button>

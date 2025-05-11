@@ -3,9 +3,9 @@ import Button from "../../components/Button";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import Input from "../../components/Input";
 import * as yup from "yup";
-import { useState } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import accountApis from "../../apis/authApis";
+import { useMutation } from "@tanstack/react-query";
 
 interface FormValues {
   password: string;
@@ -31,7 +31,6 @@ const schema = yup
   .required();
 
 export default function ResetPassword() {
-  const [loading, setLoading] = useState<boolean>();
   const navigate = useNavigate();
   const {
     handleSubmit,
@@ -47,30 +46,19 @@ export default function ResetPassword() {
 const [searchParams] = useSearchParams();
 const token = searchParams.get("token"); // Lấy giá trị token
 
-console.log("Token:", token);
+const resetPasswordMutation = useMutation({
+  mutationFn: (body: {
+    password: string,
+    forgot_password_token: string,
+  }) => accountApis.reset_password(body),
+  onSuccess:() => {
+    navigate("/login");
+  }
+})
+
 
   const onSubmit: SubmitHandler<FormValues> = (values: FormValues) => {
-    console.log("login", values);
-    setLoading(true);
-    accountApis
-      .reset_password({
-          password: values.password,
-          forgot_password_token: token as string
-      })
-      .then(function (data) {
-        console.log(data);
-        navigate("/login");
-        // storage.setToken(STORAGE_KEY.TOKEN, token);
-        // storage.setUser(STORAGE_KEY.INFO, JSON.stringify(user));
-      })
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .catch((error: any) => {
-        // errorHelper(err);
-        console.log(error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    resetPasswordMutation.mutate({password: values.password, forgot_password_token: token as string})
   };
   return (
     <div className="bg-orange">
@@ -114,8 +102,8 @@ console.log("Token:", token);
               <div className="mt-1">
                 <Button
                   className="w-full py-4 px-2 uppercase bg-red-500 text-white text-sm hover:bg-red-600 flex justify-center items-center gap-2"
-                  isLoading={loading}
-                  disabled={loading}
+                  isLoading={resetPasswordMutation.isPending}
+                  disabled={resetPasswordMutation.isPending}
                 >
                   Rest password
                 </Button>

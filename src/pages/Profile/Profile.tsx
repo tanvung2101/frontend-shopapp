@@ -12,6 +12,8 @@ import InputNumber from "../../components/InputNumber";
 import accountApis, { UpdateUser } from "../../apis/authApis";
 import { storage } from "../../utils/storage";
 import { AppContext } from "../../contexts/app.context";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 const userSchema = yup.object({
   name: yup.string().max(160, "Độ dài tối đa là 160 ký tự").optional(),
@@ -24,6 +26,11 @@ type FormData = {
   phone?: string | undefined;
   address?: string | undefined;
   avatar?: string | undefined;
+};
+
+type UpdateUserVariables = {
+  user: UpdateUser;
+  userId: number;
 };
 export default function Profile() {
   const { profile, setProfile } = useContext(AppContext)
@@ -43,15 +50,23 @@ export default function Profile() {
     },
     resolver: yupResolver(userSchema),
   });
-  const updateProfile = async (user: UpdateUser, userId: number) => {
-    const data = await accountApis.updateUser(user, userId);
-    console.log(data)
-    setProfile(data.data)
-    storage.setInfo(data.data)
-  };
-  const onSubmit = handleSubmit(async (data) => {
+  const updateProfileMutation = useMutation({
+    mutationFn: ({ user, userId }: UpdateUserVariables) => accountApis.updateUser(user, userId),
+    onSuccess(data) {
+      setProfile(data.data)
+      storage.setInfo(data.data)
+      toast.success(data.message)
+    },
+  });
+  const uploadAvatarMutation = useMutation({
+    mutationFn: (form:globalThis.FormData) => imageApi.uploadImage(form),
+    onSuccess(data) {
+      setValue("avatar", data.files[0]);
+    },
+  })
+  const onSubmit = handleSubmit((data) => {
     console.log(data);
-    await updateProfile(data, profile?.id as number)
+    updateProfileMutation.mutate({ user: data, userId: profile?.id as number });
   });
   const handleChangeFile = (file?: File) => {
     setFile(file);
@@ -64,8 +79,7 @@ export default function Profile() {
     if (file) {
       const form = new FormData();
       form.append("images", file);
-      const result = await imageApi.uploadImage(form);
-      setValue("avatar", result.files[0]);
+      uploadAvatarMutation.mutate(form);
       // console.log(result.files[0]);
       // https://shopapp-online.s3.ap-southeast-1.amazonaws.com/uploads/1743178884098-shopping.webp
     }
@@ -73,6 +87,15 @@ export default function Profile() {
   useEffect(() => {
     uploadImage();
   }, [file]);
+  useEffect(() => {
+    if (profile) {
+      setValue('name', profile.name)
+      setValue('phone', profile.phone)
+      // setValue('address', profile.address || '')
+      setValue('avatar', profile.avatar)
+      // setValue('date_of_birth', profile.date_of_birth ? new Date(profile?.date_of_birth) : new Date(1990, 0, 1))
+    }
+  }, [profile, setValue])
   return (
     <div className="rounded-sm bg-white px-2 md:px-7 pb-10 md:pb-20 shadow">
       <div className="border-b border-b-gray-200 py-6">
