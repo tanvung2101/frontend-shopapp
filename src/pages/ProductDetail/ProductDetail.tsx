@@ -142,7 +142,7 @@ export default function ProductDetail() {
               <div className="col-span-5">
                 <div className="relative w-full pt-[100%] shadow">
                   <img
-                    src={activeImage || "l"}
+                    src={activeImage || productDetail.data.image}
                     alt={productDetail.data?.name}
                     className="absolute top-0 left-0 bg-white w-full h-full object-cover"
                   />
