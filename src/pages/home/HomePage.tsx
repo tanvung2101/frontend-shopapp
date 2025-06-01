@@ -28,16 +28,17 @@ export default function HomePage() {
 
   return (
     <div className="bg-gray-200 py-6">
-      <div className="layout">
+      <div className="layout pl-0">
         {(
           <div className="grid grid-cols-12 gap-6">
-            <div className="col-span-3">
+            <div className="sm:col-span-3">
               <SideFilter
+                className="hidden"
                 queryConfig={queryConfig}
                 categories={categories?.data}
               />
             </div>
-            <div className="col-span-9">
+            <div className="col-span-12 w-full sm:col-span-9">
               {productsData && <SortProductList
                 queryConfig={queryConfig}
                 pageSize={productsData.total_pages}

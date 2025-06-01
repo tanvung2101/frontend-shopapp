@@ -18,6 +18,7 @@ type FormData = {
 interface Props {
   queryConfig: QueryConfig;
   categories?: Category[];
+  className?: string;
 }
 
 const schema = yup.object().shape({
@@ -35,7 +36,7 @@ const schema = yup.object().shape({
   price_max: yup.string().matches(/^\d*$/, "Chỉ nhập số"),
 });
 
-export default function SideFilter({ queryConfig, categories }: Props) {
+export default function SideFilter({ queryConfig, categories, className }: Props) {
   const navigate = useNavigate();
   const { category } = queryConfig;
   const {
@@ -80,7 +81,7 @@ export default function SideFilter({ queryConfig, categories }: Props) {
     });
   };
   return (
-    <div className="py-4">
+    <div className={className + " py-4 sm:inline-block"}>
       <Link to={path.home} className="flex items-center font-bold">
         <svg viewBox="0 0 12 10" className="mr-3 h-4 w-3 fill-current">
           <g fillRule="evenodd" stroke="none" strokeWidth={1}>

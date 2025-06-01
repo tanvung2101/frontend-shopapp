@@ -137,10 +137,10 @@ export default function ProductDetail() {
     <div className="bg-gray-200 py-6">
       <div className="layout">
         {productDetail && (
-          <div className="bg-white p-4 shadow">
-            <div className="grid grid-cols-12 gap-9">
-              <div className="col-span-5">
-                <div className="relative w-full pt-[100%] shadow">
+          <div className="bg-white p-2 sm:p-4 shadow">
+            <div className="grid grid-cols-12 sm:gap-9">
+              <div className="sm:col-span-5 col-span-12">
+                <div className="relative w-full sm:pt-[100%] shadow">
                   <img
                     src={activeImage || productDetail.data.image}
                     alt={productDetail.data?.name}
@@ -206,7 +206,7 @@ export default function ProductDetail() {
                   </button>
                 </div>
               </div>
-              <div className="col-span-7">
+              <div className="sm:col-span-7 col-span-12">
                 <h1 className="text-xl font-medium uppercase">
                   {productDetail.data?.name}
                 </h1>
