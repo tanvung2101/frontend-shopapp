@@ -140,7 +140,7 @@ export default function ProductDetail() {
           <div className="bg-white p-2 sm:p-4 shadow">
             <div className="grid grid-cols-12 sm:gap-9">
               <div className="sm:col-span-5 col-span-12">
-                <div className="relative w-full sm:pt-[100%] shadow">
+                <div className="relative w-full sm:pt-[100%] shadow h-52">
                   <img
                     src={activeImage || productDetail.data.image}
                     alt={productDetail.data?.name}
