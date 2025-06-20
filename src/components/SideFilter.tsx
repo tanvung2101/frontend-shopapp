@@ -9,6 +9,7 @@ import * as yup from "yup";
 import { QueryConfig } from "../hooks/useQueryConfig";
 import { Category } from "../interface/category.interface";
 import classNames from "classnames";
+import { useTranslation } from "react-i18next";
 
 type FormData = {
   price_max?: string;
@@ -37,6 +38,7 @@ const schema = yup.object().shape({
 });
 
 export default function SideFilter({ queryConfig, categories, className }: Props) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { category } = queryConfig;
   const {
@@ -96,7 +98,7 @@ export default function SideFilter({ queryConfig, categories, className }: Props
             </g>
           </g>
         </svg>
-        Tất cả danh mục
+        {t('all categories')}
       </Link>
       <div className="bg-gray-300 h-[1px] my-4"></div>
       <ul>
@@ -152,11 +154,11 @@ export default function SideFilter({ queryConfig, categories, className }: Props
             />
           </g>
         </svg>
-        bộ lọc tìm kiếm
+        {t('search filter')}
       </Link>
       <div className="bg-gray-300 h-[1px] my-4"></div>
       <div className="my-5">
-        <div>Khoản giá</div>
+        <div>{t('price range filter')}</div>
         <form className="mt-2" onSubmit={onSubmit}>
           <div className="flex items-start">
             <Controller
@@ -206,19 +208,19 @@ export default function SideFilter({ queryConfig, categories, className }: Props
             {errors.price_min?.message}
           </div>
           <Button className="w-full p-2 uppercase bg-orange text-white text-sm hover:bg-orange/80 flex justify-center items-center">
-            Âp dụng
+            {t('apply')}
           </Button>
         </form>
       </div>
       <div className="bg-gray-300 h-[1px] my-4"></div>
-      <div className="text-sm">Đáng giá</div>
+      <div className="text-sm">{t('rating filter')}</div>
       <RatingStars queryConfig={queryConfig}/>
       <div className="bg-gray-300 h-[1px] my-4"></div>
       <Button
         onClick={() => handleRemoveAll()}
         className="w-full p-2 uppercase bg-orange text-white text-sm hover:bg-orange/80 flex justify-center items-center"
       >
-        xoá tất cả
+       {t('clear all filters')}
       </Button>
     </div>
   );
